@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -675,7 +675,7 @@ function updateNoteCurrencyUI(){
     }
 
     const isDollar = noteCurrencyMode === 'USD';
-    button.textContent = isDollar ? 'Ø¯' : '$';
+    button.textContent = isDollar ? 'د' : '$';
     button.classList.toggle('active', isDollar);
     button.title = isDollar ? 'Change to dinar' : 'Change to dollar';
 }
@@ -901,8 +901,8 @@ function showNames(){
 
             <div class="icon-buttons">
                 ${mapButtons}
-                <button class="icon-btn edit-btn" onclick="editName(${data.index})" title="Edit">âœ</button>
-                <button class="icon-btn delete-btn" onclick="deleteName(${data.index})" title="Delete">ðŸ—‘</button>
+                <button class="icon-btn edit-btn" onclick="editName(${data.index})" title="Edit">✏</button>
+                <button class="icon-btn delete-btn" onclick="deleteName(${data.index})" title="Delete">🗑</button>
             </div>
         `;
 
@@ -1012,4 +1012,3 @@ showNames();
 
 </body>
 </html>
-

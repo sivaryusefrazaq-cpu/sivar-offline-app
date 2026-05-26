@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ku">
 <head>
 <meta charset="UTF-8" />
@@ -523,7 +523,7 @@ body.pdf-export .buttons{
 
         <div style="text-align:right;">
             <div style="font-size:20px;font-weight:bold;">Carpet Invoice</div>
-            <div style="opacity:.85;">Ø¨Û† ÙØ±Û†Ø´ØªÙ†ÛŒ ÙÛ•Ø±Ø´ Ùˆ Ù…Ú©Û†Ú©ÛŽØªÛŒ ØªÙˆØ±Ú©ÛŒ Ùˆ Ú©Ø§Ø±Û† Ù‡Û•ÚµÛ•</div>
+            <div style="opacity:.85;">بۆ فرۆشتنی فەرش و مکۆکێتی تورکی و کارۆ هەڵە</div>
         </div>
     </div>
 
@@ -551,27 +551,27 @@ body.pdf-export .buttons{
             </span>
         </div>
 
-        <div class="address-text">Ù‡Û•ÙˆÙ„ÛŽØ± -Ù¦Ù  Ù…Û•ØªØ±ÛŒ Ø¨Û•Ø±Ø²Û• Ù¾Ø±Ø¯ÛŒ Ø¹Û•Ù†Ú©Ø§ÙˆÛ•</div>
+        <div class="address-text">هەولێر -٦٠ مەتری بەرزە پردی عەنکاوە</div>
     </div>
 
     <div class="info">
-        <label>Ø¨Û•Ú•ÛŽØ²:</label>
+        <label>بەڕێز:</label>
         <span contenteditable="true"></span>
 
-        <label>Ú˜Ù…Ø§Ø±Û•ÛŒ Ù…Û†Ø¨Ø§ÛŒÙ„:</label>
+        <label>ژمارەی مۆبایل:</label>
         <span contenteditable="true"></span>
 
-        <label>Ù†Ø§ÙˆÙ†ÛŒØ´Ø§Ù†:</label>
+        <label>ناونیشان:</label>
         <span contenteditable="true"></span>
     </div>
 
     <div class="table-wrapper">
         <table id="invoiceTable">
             <tr>
-                <th>Ù†Ø±Ø®<br><small id="priceCurrencyLabel">Ø¯ÛŒÙ†Ø§Ø±</small></th>
-                <th>Ù…Û•ØªØ±</th>
-                <th>Ù†Ø§ÙˆÛ•Ú•Û†Ú© / Description</th>
-                <th>Ø¨Ú•ÛŒ Ù¾Ø§Ø±Û•<br><small id="amountCurrencyLabel">Ø¯ÛŒÙ†Ø§Ø±</small></th>
+                <th>نرخ<br><small id="priceCurrencyLabel">دینار</small></th>
+                <th>مەتر</th>
+                <th>ناوەڕۆک / Description</th>
+                <th>بڕی پارە<br><small id="amountCurrencyLabel">دینار</small></th>
                 <th>#</th>
             </tr>
 
@@ -588,13 +588,13 @@ body.pdf-export .buttons{
     <div class="footer-wrapper">
         <div class="footer">
             <div>
-                Ø¦ÛŒÙ…Ø²Ø§:
+                ئیمزا:
                 <span contenteditable="true"></span>
             </div>
 
             <div class="grand-total-box">
                 <div>
-                    Ú©Û†ÛŒ Ú¯Ø´ØªÛŒ:
+                    کۆی گشتی:
                     <span id="grandTotal"></span>
                 </div>
 
@@ -602,7 +602,7 @@ body.pdf-export .buttons{
             </div>
         </div>
 
-        <div class="return-text">Ù‡Û•ÚµÛ• Ø¯Û•Ú¯Û•Ú•ÛŽØªÛ•ÙˆÛ• Ø¨Û† Ù‡Û•Ø±Ø¯ÙˆÙˆÙ„Ø§</div>
+        <div class="return-text">هەڵە دەگەڕێتەوە بۆ هەردوولا</div>
     </div>
 
     <div class="buttons">
@@ -676,13 +676,13 @@ const mm = String(today.getMonth() + 1).padStart(2, '0');
 const dd = String(today.getDate()).padStart(2, '0');
 
 const kurdishDays = [
-    "ÛŒÛ•Ú©Ø´Û•Ù…Ù…Û•",
-    "Ø¯ÙˆÙˆØ´Û•Ù…Ù…Û•",
-    "Ø³ÛŽØ´Û•Ù…Ù…Û•",
-    "Ú†ÙˆØ§Ø±Ø´Û•Ù…Ù…Û•",
-    "Ù¾ÛŽÙ†Ø¬Ø´Û•Ù…Ù…Û•",
-    "Ù‡Û•ÛŒÙ†ÛŒ",
-    "Ø´Û•Ù…Ù…Û•"
+    "یەکشەممە",
+    "دووشەممە",
+    "سێشەممە",
+    "چوارشەممە",
+    "پێنجشەممە",
+    "هەینی",
+    "شەممە"
 ];
 
 const kurdishDay = kurdishDays[today.getDay()];
@@ -859,9 +859,9 @@ function numberToKurdish(num, currency){
 
     if(!num) return "";
 
-    const ones = ["","ÛŒÛ•Ú©","Ø¯ÙˆÙˆ","Ø³ÛŽ","Ú†ÙˆØ§Ø±","Ù¾ÛŽÙ†Ø¬","Ø´Û•Ø´","Ø­Û•ÙˆØª","Ù‡Û•Ø´Øª","Ù†Û†"];
-    const teens = ["Ø¯Û•","ÛŒØ§Ø²Ø¯Û•","Ø¯ÙˆØ§Ø²Ø¯Û•","Ø³ÛŽØ²Ø¯Û•","Ú†ÙˆØ§Ø±Ø¯Û•","Ù¾Ø§Ø²Ø¯Û•","Ø´Ø§Ø²Ø¯Û•","Ø­Û•Ú¤Ø¯Û•","Ù‡Û•Ú˜Ø¯Û•","Ù†Û†Ø²Ø¯Û•"];
-    const tens = ["","","Ø¨ÛŒØ³Øª","Ø³ÛŒ","Ú†Ù„","Ù¾Û•Ù†Ø¬Ø§","Ø´Û•Ø³Øª","Ø­Û•ÙØªØ§","Ù‡Û•Ø´ØªØ§","Ù†Û•ÙˆÛ•Ø¯"];
+    const ones = ["","یەک","دوو","سێ","چوار","پێنج","شەش","حەوت","هەشت","نۆ"];
+    const teens = ["دە","یازدە","دوازدە","سێزدە","چواردە","پازدە","شازدە","حەڤدە","هەژدە","نۆزدە"];
+    const tens = ["","","بیست","سی","چل","پەنجا","شەست","حەفتا","هەشتا","نەوەد"];
 
     function underHundred(n){
         if(n < 10) return ones[n];
@@ -870,7 +870,7 @@ function numberToKurdish(num, currency){
         const ten = Math.floor(n / 10);
         const one = n % 10;
 
-        return tens[ten] + (one ? " Ùˆ " + ones[one] : "");
+        return tens[ten] + (one ? " و " + ones[one] : "");
     }
 
     function underThousand(n){
@@ -880,11 +880,11 @@ function numberToKurdish(num, currency){
         let text = "";
 
         if(hundred){
-            text += hundred === 1 ? "Ø³Û•Ø¯" : ones[hundred] + " Ø³Û•Ø¯";
+            text += hundred === 1 ? "سەد" : ones[hundred] + " سەد";
         }
 
         if(rest){
-            text += (text ? " Ùˆ " : "") + underHundred(rest);
+            text += (text ? " و " : "") + underHundred(rest);
         }
 
         return text;
@@ -897,27 +897,27 @@ function numberToKurdish(num, currency){
             const thousand = Math.floor(n / 1000);
             const rest = n % 1000;
 
-            return convert(thousand) + " Ù‡Û•Ø²Ø§Ø±" + (rest ? " Ùˆ " + convert(rest) : "");
+            return convert(thousand) + " هەزار" + (rest ? " و " + convert(rest) : "");
         }
 
         if(n < 1000000000){
             const million = Math.floor(n / 1000000);
             const rest = n % 1000000;
 
-            return convert(million) + " Ù…Ù„ÛŒÛ†Ù†" + (rest ? " Ùˆ " + convert(rest) : "");
+            return convert(million) + " ملیۆن" + (rest ? " و " + convert(rest) : "");
         }
 
         const billion = Math.floor(n / 1000000000);
         const rest = n % 1000000000;
 
-        return convert(billion) + " Ù…Ù„ÛŒØ§Ø±" + (rest ? " Ùˆ " + convert(rest) : "");
+        return convert(billion) + " ملیار" + (rest ? " و " + convert(rest) : "");
     }
 
     return convert(num) + " " + currency;
 }
 
 function getCurrencyName(){
-    return currencyMode === "USD" ? "Ø¯Û†Ù„Ø§Ø±" : "Ø¯ÛŒÙ†Ø§Ø±";
+    return currencyMode === "USD" ? "دۆلار" : "دینار";
 }
 
 function updateCurrencyUI(){
@@ -925,12 +925,12 @@ function updateCurrencyUI(){
     const button = document.getElementById("currencyToggleBtn");
 
     document.getElementById("priceCurrencyLabel").innerText =
-        isDollar ? "Ø¯Û†Ù„Ø§Ø±" : "Ø¯ÛŒÙ†Ø§Ø±";
+        isDollar ? "دۆلار" : "دینار";
 
     document.getElementById("amountCurrencyLabel").innerText =
-        isDollar ? "Ø¯Û†Ù„Ø§Ø±" : "Ø¯ÛŒÙ†Ø§Ø±";
+        isDollar ? "دۆلار" : "دینار";
 
-    button.innerText = isDollar ? "Ø¯" : "$";
+    button.innerText = isDollar ? "د" : "$";
     button.classList.toggle("active", isDollar);
     button.title = isDollar ? "Change to dinar" : "Change to dollar";
 }
@@ -1185,4 +1185,3 @@ initializeInvoicePage();
 
 </body>
 </html>
-

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -154,9 +154,9 @@ function numberToKurdish(num){
 
     num = Number(String(num).replace(/,/g,'')) || 0;
 
-    const ones = ["","ÛŒÛ•Ú©","Ø¯ÙˆÙˆ","Ø³ÛŽ","Ú†ÙˆØ§Ø±","Ù¾ÛŽÙ†Ø¬","Ø´Û•Ø´","Ø­Û•ÙˆØª","Ù‡Û•Ø´Øª","Ù†Û†"];
-    const teens = ["Ø¯Û•","ÛŒØ§Ø²Ø¯Û•","Ø¯ÙˆØ§Ø²Ø¯Û•","Ø³ÛŒØ§Ø²Ø¯Û•","Ú†ÙˆØ§Ø±Ø¯Û•","Ù¾Ø§Ø²Ø¯Û•","Ø´Ø§Ø²Ø¯Û•","Ø­Û•Ú¤Ø¯Û•","Ù‡Û•Ú˜Ø¯Û•","Ù†Û†Ø²Ø¯Û•"];
-    const tens = ["","","Ø¨ÛŒØ³Øª","Ø³ÛŒ","Ú†Ù„","Ù¾Û•Ù†Ø¬Ø§","Ø´Û•Ø³Øª","Ø­Û•ÙØªØ§","Ù‡Û•Ø´ØªØ§","Ù†Û•ÙˆÛ•Ø¯"];
+    const ones = ["","یەک","دوو","سێ","چوار","پێنج","شەش","حەوت","هەشت","نۆ"];
+    const teens = ["دە","یازدە","دوازدە","سیازدە","چواردە","پازدە","شازدە","حەڤدە","هەژدە","نۆزدە"];
+    const tens = ["","","بیست","سی","چل","پەنجا","شەست","حەفتا","هەشتا","نەوەد"];
 
     if(num === 0) return "";
     if(num < 10) return ones[num];
@@ -165,30 +165,30 @@ function numberToKurdish(num){
     if(num < 100){
         const t = Math.floor(num / 10);
         const o = num % 10;
-        return o === 0 ? tens[t] : tens[t] + " Ùˆ " + ones[o];
+        return o === 0 ? tens[t] : tens[t] + " و " + ones[o];
     }
 
     if(num < 1000){
         const h = Math.floor(num / 100);
         const rest = num % 100;
-        let text = h === 1 ? "Ø³Û•Ø¯" : ones[h] + " Ø³Û•Ø¯";
-        if(rest > 0) text += " Ùˆ " + numberToKurdish(rest);
+        let text = h === 1 ? "سەد" : ones[h] + " سەد";
+        if(rest > 0) text += " و " + numberToKurdish(rest);
         return text;
     }
 
     if(num < 1000000){
         const th = Math.floor(num / 1000);
         const rest = num % 1000;
-        let text = numberToKurdish(th) + " Ù‡Û•Ø²Ø§Ø±";
-        if(rest > 0) text += " Ùˆ " + numberToKurdish(rest);
+        let text = numberToKurdish(th) + " هەزار";
+        if(rest > 0) text += " و " + numberToKurdish(rest);
         return text;
     }
 
     if(num < 1000000000){
         const mil = Math.floor(num / 1000000);
         const rest = num % 1000000;
-        let text = numberToKurdish(mil) + " Ù…Ù„ÛŒÛ†Ù†";
-        if(rest > 0) text += " Ùˆ " + numberToKurdish(rest);
+        let text = numberToKurdish(mil) + " ملیۆن";
+        if(rest > 0) text += " و " + numberToKurdish(rest);
         return text;
     }
 
@@ -303,7 +303,7 @@ function generateInvoiceHTML(invoice){
 
             <div style="text-align:right;">
                 <div style="font-size:20px;font-weight:bold;">Carpet Invoice</div>
-                <div style="opacity:.85;">Ø¨Û† ÙØ±Û†Ø´ØªÙ†ÛŒ ÙÛ•Ø±Ø´ Ùˆ Ù…Û†Ú©ÛŽÙ†ÛŒ</div>
+                <div style="opacity:.85;">بۆ فرۆشتنی فەرش و مۆکێنی</div>
             </div>
         </div>
 
@@ -344,7 +344,7 @@ function generateInvoiceHTML(invoice){
                 </span>
             </div>
 
-            <div style="margin-left:auto;">Ù‡Û•ÙˆÙ„ÛŽØ± -Ù¦Ù  Ù…Û•ØªØ±ÛŒ Ø¨Û•Ø±Ø²Û• Ù¾Ø±Ø¯ÛŒ Ø¹Û•Ù†Ú©Ø§ÙˆÛ•</div>
+            <div style="margin-left:auto;">هەولێر -٦٠ مەتری بەرزە پردی عەنکاوە</div>
         </div>
 
         <div style="
@@ -358,13 +358,13 @@ function generateInvoiceHTML(invoice){
             z-index:2;
             color:black;
         ">
-            <label style="font-weight:bold;color:black;">Ø¨Û•Ú•ÛŽØ²:</label>
+            <label style="font-weight:bold;color:black;">بەڕێز:</label>
             <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${invoice.customerName || ""}</span>
 
-            <label style="font-weight:bold;color:black;">Ú˜Ù…Ø§Ø±Û•ÛŒ Ù…Û†Ø¨Ø§ÛŒÙ„:</label>
+            <label style="font-weight:bold;color:black;">ژمارەی مۆبایل:</label>
             <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${invoice.phone || ""}</span>
 
-            <label style="font-weight:bold;color:black;">Ù†Ø§ÙˆÙ†ÛŒØ´Ø§Ù†:</label>
+            <label style="font-weight:bold;color:black;">ناونیشان:</label>
             <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${invoice.address || ""}</span>
         </div>
 
@@ -376,10 +376,10 @@ function generateInvoiceHTML(invoice){
                 color:#111;
             ">
                 <tr>
-                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">Ù†Ø±Ø®<br><small>Ø¯ÛŒÙ†Ø§Ø± / Ø¯Û†Ù„Ø§Ø±</small></th>
-                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">Ù…Û•ØªØ±</th>
-                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">Ù†Ø§ÙˆÛ•Ú•Û†Ú© / Description</th>
-                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">Ø¨Ú•ÛŒ Ù¾Ø§Ø±Û•<br><small>Ø¯ÛŒÙ†Ø§Ø± / Ø¯Û†Ù„Ø§Ø±</small></th>
+                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">نرخ<br><small>دینار / دۆلار</small></th>
+                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">مەتر</th>
+                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">ناوەڕۆک / Description</th>
+                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">بڕی پارە<br><small>دینار / دۆلار</small></th>
                     <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:6px;border-bottom:2px solid #0d2f8f;width:35px;">#</th>
                 </tr>
 
@@ -427,7 +427,7 @@ function generateInvoiceHTML(invoice){
             ">
 
                 <div>
-                    Ø¦ÛŒÙ…Ø²Ø§:
+                    ئیمزا:
                     <span style="display:inline-block;min-width:150px;border-bottom:2px solid #2e6cff;padding:4px;"></span>
                 </div>
 
@@ -435,7 +435,7 @@ function generateInvoiceHTML(invoice){
                     <div style="color:#1a4fd8;font-weight:bold;">${kurdishTotal}</div>
 
                     <div>
-                        Ú©Û†ÛŒ Ú¯Ø´ØªÛŒ:
+                        کۆی گشتی:
                         <span style="display:inline-block;min-width:150px;border-bottom:2px solid #2e6cff;padding:4px;">
                             ${invoice.total || ""}
                         </span>
@@ -450,7 +450,7 @@ function generateInvoiceHTML(invoice){
                 margin-top:18px;
                 font-size:16px;
             ">
-                Ù‡Û•ÚµÛ• Ø¯Û•Ú¯Û•Ú•ÛŽØªÛ•ÙˆÛ• Ø¨Û† Ù‡Û•Ø±Ø¯ÙˆÙˆÙ„Ø§
+                هەڵە دەگەڕێتەوە بۆ هەردوولا
             </div>
         </div>
     </div>
@@ -467,7 +467,7 @@ function escapeHTML(value){
 }
 
 function getCurrencyLabel(invoice){
-    return invoice.currency === "USD" ? "Ø¯Û†Ù„Ø§Ø±" : "Ø¯ÛŒÙ†Ø§Ø±";
+    return invoice.currency === "USD" ? "دۆلار" : "دینار";
 }
 
 function generateInvoiceHTMLV2(invoice){
@@ -526,7 +526,7 @@ function generateInvoiceHTMLV2(invoice){
 
             <div style="text-align:right;">
                 <div style="font-size:20px;font-weight:bold;">Carpet Invoice</div>
-                <div style="opacity:.85;">Ø¨Û† ÙØ±Û†Ø´ØªÙ†ÛŒ ÙÛ•Ø±Ø´ Ùˆ Ù…Ú©Û†Ú©ÛŽØªÛŒ ØªÙˆØ±Ú©ÛŒ Ùˆ Ú©Ø§Ø±Û† Ù‡Û•ÚµÛ•</div>
+                <div style="opacity:.85;">بۆ فرۆشتنی فەرش و مکۆکێتی تورکی و کارۆ هەڵە</div>
             </div>
         </div>
 
@@ -568,27 +568,27 @@ function generateInvoiceHTMLV2(invoice){
                 </span>
             </div>
 
-            <div style="text-align:right;direction:rtl;line-height:1.5;min-width:0;">Ù‡Û•ÙˆÙ„ÛŽØ± -Ù¦Ù  Ù…Û•ØªØ±ÛŽ Ø¨Û•Ø±Ø²Û• Ù¾Ø±Ø¯ÛŒ Ø¹Û•Ù†Ú©Ø§ÙˆÛ•</div>
+            <div style="text-align:right;direction:rtl;line-height:1.5;min-width:0;">هەولێر -٦٠ مەترێ بەرزە پردی عەنکاوە</div>
         </div>
 
         <div style="padding:22px;display:flex;flex-direction:column;gap:14px;direction:rtl;text-align:right;position:relative;z-index:2;">
-            <label style="font-weight:bold;color:black;">Ø¨Û•Ú•ÛŽØ²:</label>
+            <label style="font-weight:bold;color:black;">بەڕێز:</label>
             <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${escapeHTML(invoice.customerName)}</span>
 
-            <label style="font-weight:bold;color:black;">Ú˜Ù…Ø§Ø±Û•ÛŒ Ù…Û†Ø¨Ø§ÛŒÙ„:</label>
+            <label style="font-weight:bold;color:black;">ژمارەی مۆبایل:</label>
             <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${escapeHTML(invoice.phone)}</span>
 
-            <label style="font-weight:bold;color:black;">Ù†Ø§ÙˆÙ†ÛŒØ´Ø§Ù†:</label>
+            <label style="font-weight:bold;color:black;">ناونیشان:</label>
             <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${escapeHTML(invoice.address)}</span>
         </div>
 
         <div style="width:100%;overflow-x:auto;">
             <table style="width:100%;border-collapse:collapse;table-layout:fixed;position:relative;z-index:2;color:#111;">
                 <tr>
-                    <th style="width:90px;max-width:90px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">Ù†Ø±Ø®<br><small>${currencyLabel}</small></th>
-                    <th style="width:60px;max-width:60px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">Ù…Û•ØªØ±</th>
-                    <th style="width:260px;max-width:260px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">Ù†Ø§ÙˆÛ•Ú•Û†Ú© / Description</th>
-                    <th style="width:110px;max-width:110px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">Ø¨Ú•ÛŒ Ù¾Ø§Ø±Û•<br><small>${currencyLabel}</small></th>
+                    <th style="width:90px;max-width:90px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">نرخ<br><small>${currencyLabel}</small></th>
+                    <th style="width:60px;max-width:60px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">مەتر</th>
+                    <th style="width:260px;max-width:260px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">ناوەڕۆک / Description</th>
+                    <th style="width:110px;max-width:110px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">بڕی پارە<br><small>${currencyLabel}</small></th>
                     <th style="width:35px;min-width:35px;max-width:35px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:6px;border-bottom:2px solid #0d2f8f;font-size:14px;">#</th>
                 </tr>
 
@@ -607,13 +607,13 @@ function generateInvoiceHTMLV2(invoice){
         <div style="background:#f7f9ff;border-top:2px solid #c9d8ff;padding:22px;position:relative;z-index:2;">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;font-weight:bold;">
                 <div>
-                    Ø¦ÛŒÙ…Ø²Ø§:
+                    ئیمزا:
                     <span style="display:inline-block;min-width:150px;border-bottom:2px solid #2e6cff;padding:4px;"></span>
                 </div>
 
                 <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;direction:rtl;">
                     <div>
-                        Ú©Û†ÛŒ Ú¯Ø´ØªÛŒ:
+                        کۆی گشتی:
                         <span style="display:inline-block;min-width:150px;border-bottom:2px solid #2e6cff;padding:4px;">
                             ${escapeHTML(invoice.total)}
                         </span>
@@ -624,7 +624,7 @@ function generateInvoiceHTMLV2(invoice){
             </div>
 
             <div style="color:#d11a2a;font-weight:bold;text-align:center;margin-top:18px;font-size:16px;">
-                Ù‡Û•ÚµÛ• Ø¯Û•Ú¯Û•Ú•ÛŽØªÛ•ÙˆÛ• Ø¨Û† Ù‡Û•Ø±Ø¯ÙˆÙˆÙ„Ø§
+                هەڵە دەگەڕێتەوە بۆ هەردوولا
             </div>
         </div>
     </div>
@@ -704,7 +704,13 @@ async function downloadInvoicePDF(invoiceNumber){
 
     pdf.addImage(imgData,"PNG",0,0,pdfWidth,pdfHeight);
 
-    pdf.save("carpet-invoice-" + invoice.number + ".pdf");
+    const fileName = "carpet-invoice-" + invoice.number + ".pdf";
+
+    if(window.AndroidPdf && window.AndroidPdf.saveBase64){
+        window.AndroidPdf.saveBase64(pdf.output("datauristring"), fileName);
+    }else{
+        pdf.save(fileName);
+    }
 
     document.body.removeChild(container);
 }
@@ -741,5 +747,3 @@ renderInvoices(invoices);
 
 </body>
 </html>
-
-
