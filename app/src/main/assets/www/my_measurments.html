@@ -1,0 +1,584 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+>
+<title>Measurements</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body{
+    width:100%;
+    min-height:100%;
+    overflow-x:hidden;
+}
+
+body{
+    min-height:100vh;
+    min-height:100dvh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:'Segoe UI', Arial, sans-serif;
+    background:
+        radial-gradient(circle at top left,#4f46e5,#111827 55%),
+        linear-gradient(135deg,#0f172a,#1e293b);
+    padding:20px;
+    color:#fff;
+    overflow-y:auto;
+}
+
+body::before,
+body::after{
+    content:'';
+    position:fixed;
+    width:350px;
+    height:350px;
+    border-radius:50%;
+    filter:blur(80px);
+    opacity:.35;
+    z-index:0;
+    pointer-events:none;
+}
+
+body::before{
+    background:#6366f1;
+    top:-100px;
+    left:-100px;
+}
+
+body::after{
+    background:#06b6d4;
+    bottom:-120px;
+    right:-120px;
+}
+
+.measurement-box{
+    position:relative;
+    z-index:2;
+    width:min(100%, 760px);
+    max-height:calc(100dvh - 40px);
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:35px 30px;
+    border-radius:30px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,0.15);
+    box-shadow:0 10px 40px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.15);
+}
+
+.title{
+    font-size:clamp(34px, 6vw, 56px);
+    line-height:1.05;
+    font-weight:700;
+    text-align:center;
+    margin-bottom:12px;
+}
+
+.subtitle{
+    text-align:center;
+    color:rgba(255,255,255,0.7);
+    margin-bottom:28px;
+    font-size:clamp(16px, 3vw, 24px);
+    line-height:1.35;
+}
+
+.top-buttons{
+    display:grid;
+    grid-template-columns:160px 1fr;
+    gap:18px;
+    margin-bottom:22px;
+}
+
+.back-btn,
+.new-btn,
+.save-btn{
+    border:none;
+    cursor:pointer;
+    color:#fff;
+    font-weight:700;
+    transition:.25s ease;
+    font-size:15px;
+    touch-action:manipulation;
+}
+
+.back-btn{
+    width:100%;
+    height:58px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.15);
+}
+
+.new-btn{
+    width:100%;
+    height:58px;
+    border-radius:18px;
+    background:linear-gradient(135deg,#6366f1,#06b6d4);
+    box-shadow:0 10px 25px rgba(99,102,241,0.35);
+}
+
+.search-input,
+.form-input{
+    width:100%;
+    height:62px;
+    border:none;
+    outline:none;
+    border-radius:20px;
+    padding:0 22px;
+    font-size:18px;
+    color:#fff;
+    background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.15);
+    margin-bottom:18px;
+    appearance:none;
+    -webkit-appearance:none;
+}
+
+.search-input::placeholder,
+.form-input::placeholder{
+    color:rgba(255,255,255,0.6);
+}
+
+.form-box{
+    display:none;
+    margin-bottom:20px;
+    padding:18px;
+    border-radius:22px;
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.12);
+}
+
+.save-btn{
+    width:100%;
+    height:56px;
+    border-radius:18px;
+    background:linear-gradient(135deg,#6366f1,#06b6d4);
+}
+
+.customer-card{
+    padding:24px 28px;
+    border-radius:24px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    margin-bottom:12px;
+    color:#fff;
+}
+
+.customer-header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:12px;
+}
+
+.clickable-name{
+    flex:1;
+    min-width:0;
+    font-size:26px;
+    line-height:1.2;
+    cursor:pointer;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+}
+
+.name-line{
+    display:flex;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:8px 12px;
+    flex:1;
+    min-width:0;
+}
+
+.saved-date{
+    display:inline-flex;
+    color:rgba(255,255,255,0.68);
+    font-size:15px;
+    line-height:1.35;
+    overflow-wrap:anywhere;
+}
+
+.action-buttons{
+    display:flex;
+    gap:10px;
+    flex-shrink:0;
+}
+
+.icon-btn{
+    width:56px;
+    height:56px;
+    border:none;
+    border-radius:16px;
+    cursor:pointer;
+    color:#fff;
+    font-size:24px;
+    transition:.25s ease;
+    touch-action:manipulation;
+}
+
+.edit-btn{
+    background:rgba(6,182,212,0.25);
+    border:1px solid rgba(6,182,212,0.4);
+}
+
+.delete-btn{
+    background:rgba(239,68,68,0.25);
+    border:1px solid rgba(239,68,68,0.4);
+}
+
+.customer-card span{
+    display:block;
+    color:rgba(255,255,255,0.7);
+    font-size:21px;
+    line-height:1.35;
+    overflow-wrap:anywhere;
+}
+
+.empty-text{
+    text-align:center;
+    color:rgba(255,255,255,0.65);
+    margin-top:20px;
+    font-size:15px;
+}
+
+@media (max-width:600px){
+    body{
+        align-items:flex-start;
+        padding:
+            calc(18px + env(safe-area-inset-top))
+            14px
+            calc(28px + env(safe-area-inset-bottom));
+    }
+
+    .measurement-box{
+        width:100%;
+        max-width:none;
+        max-height:none;
+        padding:26px 18px;
+        border-radius:24px;
+    }
+
+    .title{
+        font-size:clamp(32px, 10vw, 42px);
+    }
+
+    .subtitle{
+        font-size:clamp(16px, 5vw, 20px);
+        margin-bottom:24px;
+    }
+
+    .top-buttons{
+        display:flex;
+        flex-direction:column;
+        gap:14px;
+        margin-bottom:20px;
+    }
+
+    .back-btn,
+    .new-btn{
+        width:100%;
+        height:58px;
+        font-size:16px;
+        border-radius:18px;
+    }
+
+    .search-input,
+    .form-input{
+        height:60px;
+        font-size:18px;
+        border-radius:18px;
+        padding:0 18px;
+    }
+
+    .form-box{
+        padding:14px;
+        border-radius:20px;
+    }
+
+    .customer-card{
+        padding:20px;
+        border-radius:22px;
+    }
+
+    .customer-header{
+        flex-direction:column;
+        align-items:stretch;
+        gap:16px;
+    }
+
+    .clickable-name{
+        width:100%;
+        font-size:28px;
+    }
+
+    .saved-date{
+        font-size:16px;
+    }
+
+    .action-buttons{
+        width:100%;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:12px;
+    }
+
+    .icon-btn{
+        width:100%;
+        height:58px;
+        font-size:24px;
+    }
+
+    .customer-card span{
+        font-size:22px;
+    }
+}
+
+@media (max-width:430px){
+    body{
+        padding:
+            calc(14px + env(safe-area-inset-top))
+            12px
+            calc(24px + env(safe-area-inset-bottom));
+    }
+
+    .measurement-box{
+        padding:24px 16px;
+        border-radius:22px;
+    }
+
+    .customer-card{
+        padding:18px;
+    }
+
+    .clickable-name{
+        font-size:26px;
+    }
+}
+
+@media (max-width:370px){
+    body{
+        padding-left:10px;
+        padding-right:10px;
+    }
+
+    .measurement-box{
+        padding:22px 14px;
+    }
+
+    .title{
+        font-size:32px;
+    }
+
+    .subtitle{
+        font-size:16px;
+    }
+
+    .clickable-name{
+        font-size:24px;
+    }
+
+    .customer-card span{
+        font-size:19px;
+    }
+
+    .icon-btn{
+        height:52px;
+        font-size:21px;
+    }
+}
+</style>
+<script src="./firebase-data.js"></script>
+</head>
+
+<body>
+
+<div class="measurement-box">
+    <h1 class="title">Measurements</h1>
+    <p class="subtitle">Search customers or add a new measurement name</p>
+
+    <div class="top-buttons">
+        <button class="back-btn" onclick="goBack()">Back</button>
+        <button class="new-btn" onclick="showForm()">New Name</button>
+    </div>
+
+    <input type="text" id="searchInput" class="search-input" placeholder="Search by name or phone..." onkeyup="searchCustomer()">
+
+    <div class="form-box" id="formBox">
+        <input type="text" id="nameInput" class="form-input" placeholder="Enter name">
+        <input type="text" id="phoneInput" class="form-input" placeholder="Enter phone number">
+        <button class="save-btn" id="saveBtn" onclick="saveCustomer()">Save</button>
+    </div>
+
+    <div id="customerList"></div>
+</div>
+
+<script>
+let customers = JSON.parse(localStorage.getItem("measurementCustomers")) || [];
+let editIndex = null;
+
+function getSavedStamp(){
+    return new Date().toISOString();
+}
+
+function formatSavedDate(savedAt){
+    if(!savedAt){
+        return "Saved date not recorded";
+    }
+
+    const date = new Date(savedAt);
+
+    if(Number.isNaN(date.getTime())){
+        return "Saved date not recorded";
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const dayName = date.toLocaleDateString("en-US", { weekday:"long" });
+
+    return `${year}/${month}/${day} ${dayName}`;
+}
+
+function escapeHTML(value){
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+loadCustomers();
+
+async function loadCustomers(){
+    customers = await SivarFirebase.getMeasurementCustomers();
+    searchCustomer();
+}
+
+function goBack(){
+    window.location.href = "dashboard.html";
+}
+
+function showForm(){
+    document.getElementById("formBox").style.display = "block";
+    document.getElementById("saveBtn").innerText = "Save";
+    document.getElementById("nameInput").value = "";
+    document.getElementById("phoneInput").value = "";
+    editIndex = null;
+}
+
+async function saveCustomer(){
+    const name = document.getElementById("nameInput").value.trim();
+    const phone = document.getElementById("phoneInput").value.trim();
+
+    if(name === "" || phone === ""){
+        alert("Please enter name and phone number");
+        return;
+    }
+
+    const savedAt = getSavedStamp();
+
+    if(editIndex === null){
+        customers.push({ name:name, phone:phone, savedAt:savedAt });
+    }else{
+        customers[editIndex].name = name;
+        customers[editIndex].phone = phone;
+        customers[editIndex].savedAt = savedAt;
+        editIndex = null;
+    }
+
+    await SivarFirebase.saveMeasurementCustomers(customers);
+
+    document.getElementById("nameInput").value = "";
+    document.getElementById("phoneInput").value = "";
+    document.getElementById("formBox").style.display = "none";
+    document.getElementById("saveBtn").innerText = "Save";
+
+    searchCustomer();
+}
+
+function displayCustomers(list){
+    const customerList = document.getElementById("customerList");
+    customerList.innerHTML = "";
+
+    if(list.length === 0){
+        customerList.innerHTML = `<p class="empty-text">No customers found</p>`;
+        return;
+    }
+
+    list.forEach(function(customer){
+        const realIndex = customers.indexOf(customer);
+        const savedDate = formatSavedDate(customer.savedAt);
+
+        customerList.innerHTML += `
+            <div class="customer-card">
+                <div class="customer-header">
+                    <div class="name-line">
+                        <strong class="clickable-name" onclick="openMeasurementPage(${realIndex})">${escapeHTML(customer.name)}</strong>
+                        <small class="saved-date">Saved: ${escapeHTML(savedDate)}</small>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="icon-btn edit-btn" onclick="editCustomer(${realIndex})" title="Edit">âœ</button>
+                        <button class="icon-btn delete-btn" onclick="deleteCustomer(${realIndex})" title="Delete">ðŸ—‘</button>
+                    </div>
+                </div>
+                <span>${escapeHTML(customer.phone)}</span>
+            </div>
+        `;
+    });
+}
+
+function openMeasurementPage(index){
+    localStorage.setItem("selectedMeasurementIndex", index);
+    window.location.href = "measurement-details.html";
+}
+
+function editCustomer(index){
+    document.getElementById("formBox").style.display = "block";
+    document.getElementById("nameInput").value = customers[index].name;
+    document.getElementById("phoneInput").value = customers[index].phone;
+    document.getElementById("saveBtn").innerText = "Update";
+    editIndex = index;
+}
+
+async function deleteCustomer(index){
+    if(confirm("Are you sure you want to delete this customer?")){
+        customers.splice(index, 1);
+        await SivarFirebase.saveMeasurementCustomers(customers);
+        searchCustomer();
+    }
+}
+
+function searchCustomer(){
+    const searchText = document.getElementById("searchInput").value.toLowerCase();
+
+    const filteredCustomers = customers.filter(function(customer){
+        return customer.name.toLowerCase().includes(searchText) || customer.phone.includes(searchText);
+    });
+
+    displayCustomers(filteredCustomers);
+}
+
+displayCustomers(customers);
+</script>
+
+</body>
+</html>
+

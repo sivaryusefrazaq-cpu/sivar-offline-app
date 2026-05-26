@@ -1,0 +1,213 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Login</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:'Segoe UI',sans-serif;
+    background:
+        radial-gradient(circle at top left,#4f46e5,#111827 55%),
+        linear-gradient(135deg,#0f172a,#1e293b);
+    overflow:hidden;
+}
+
+body::before,
+body::after{
+    content:'';
+    position:absolute;
+    width:350px;
+    height:350px;
+    border-radius:50%;
+    filter:blur(80px);
+    opacity:.35;
+}
+
+body::before{
+    background:#6366f1;
+    top:-100px;
+    left:-100px;
+}
+
+body::after{
+    background:#06b6d4;
+    bottom:-120px;
+    right:-120px;
+}
+
+.login-box{
+    position:relative;
+    z-index:2;
+    width:380px;
+    padding:40px 35px;
+    border-radius:28px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,0.15);
+    box-shadow:
+        0 10px 40px rgba(0,0,0,0.4),
+        inset 0 1px 1px rgba(255,255,255,0.15);
+}
+
+.title{
+    color:#fff;
+    font-size:34px;
+    font-weight:700;
+    text-align:center;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:rgba(255,255,255,0.7);
+    font-size:14px;
+    margin-bottom:35px;
+}
+
+.input-group{
+    margin-bottom:22px;
+}
+
+.input-label{
+    display:block;
+    color:#e5e7eb;
+    font-size:14px;
+    margin-bottom:8px;
+    font-weight:500;
+}
+
+.input-box{
+    width:100%;
+    height:54px;
+    border:none;
+    outline:none;
+    border-radius:16px;
+    padding:0 18px;
+    font-size:15px;
+    color:#fff;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    transition:.3s ease;
+}
+
+.input-box::placeholder{
+    color:rgba(255,255,255,0.45);
+}
+
+.input-box:focus{
+    border-color:#818cf8;
+    box-shadow:0 0 0 4px rgba(99,102,241,0.25);
+}
+
+.login-btn{
+    width:100%;
+    height:55px;
+    border:none;
+    border-radius:18px;
+    background:linear-gradient(135deg,#6366f1,#06b6d4);
+    color:#fff;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.35s ease;
+    margin-top:10px;
+}
+
+.login-btn:hover{
+    transform:translateY(-2px);
+}
+
+#error{
+    color:#ffb4b4;
+    text-align:center;
+    margin-top:18px;
+    font-size:14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+
+    <h1 class="title">Login</h1>
+    <p class="subtitle">Enter your username and password</p>
+
+    <form onsubmit="login(event)">
+
+        <div class="input-group">
+            <label class="input-label">Username</label>
+            <input 
+                type="text"
+                id="username"
+                class="input-box"
+                placeholder="Enter username"
+                required
+            />
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">Password</label>
+            <input 
+                type="password"
+                id="password"
+                class="input-box"
+                placeholder="Enter password"
+                required
+            />
+        </div>
+
+        <button type="submit" class="login-btn">
+            Login
+        </button>
+
+        <div id="error"></div>
+
+    </form>
+
+</div>
+
+<script>
+
+function login(event){
+
+    event.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const correctUsername = "sivar";
+    const correctPassword = "ravi2024";
+
+    if(username === correctUsername && password === correctPassword){
+
+        window.location.href = "dashboard.html";
+
+    }else{
+
+        document.getElementById("error").innerText =
+        "Wrong username or password";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

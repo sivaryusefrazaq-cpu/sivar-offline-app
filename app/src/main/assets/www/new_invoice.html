@@ -1,0 +1,1188 @@
+﻿<!DOCTYPE html>
+<html lang="ku">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Invoice - Carpet Shop</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Tahoma, Arial, 'Segoe UI', sans-serif;
+    background:radial-gradient(circle at top,#eaf2ff,#dbe7ff,#f5f8ff);
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:20px;
+    min-height:100vh;
+}
+
+.invoice{
+    width:100%;
+    max-width:900px;
+    background:white;
+    border-radius:18px;
+    box-shadow:0 25px 70px rgba(20,60,150,0.25);
+    overflow:hidden;
+    position:relative;
+    border:1px solid rgba(40,90,200,0.25);
+}
+
+.invoice::before{
+    content:"SIVAR";
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) rotate(-30deg);
+    font-size:140px;
+    font-weight:900;
+    letter-spacing:20px;
+    background:linear-gradient(135deg,rgba(30,90,220,0.15),rgba(120,160,255,0.05));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    opacity:0.25;
+    z-index:0;
+    pointer-events:none;
+}
+
+.header{
+    background:linear-gradient(135deg,#1a4fd8,#0d2f8f);
+    color:white;
+    padding:20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:3px solid #4f7fff;
+    position:relative;
+    z-index:2;
+    flex-wrap:wrap;
+    gap:15px;
+}
+
+.logo-group img{
+    height:60px;
+    background:white;
+    padding:5px;
+    border-radius:10px;
+    object-fit:contain;
+}
+
+.center-logo{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+.center-logo img{
+    height:75px;
+    background:white;
+    padding:6px;
+    border-radius:12px;
+    object-fit:contain;
+}
+
+.top-info{
+    display:grid;
+    grid-template-columns:max-content max-content minmax(0,1fr);
+    align-items:center;
+    gap:14px;
+    padding:12px 16px;
+    background:#f3f7ff;
+    font-weight:bold;
+    color:#1a2a55;
+    border-bottom:1px solid #dbe5ff;
+    position:relative;
+    z-index:2;
+}
+
+#invoiceNumber{
+    min-width:170px;
+}
+
+#invoiceDate{
+    font-size:13px;
+    opacity:0.85;
+    margin-top:3px;
+    font-family:Tahoma, Arial, 'Segoe UI', sans-serif;
+    white-space:nowrap;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    direction:ltr;
+    unicode-bidi:isolate;
+}
+
+.date-number{
+    direction:ltr;
+    unicode-bidi:isolate;
+}
+
+.date-day{
+    direction:rtl;
+    unicode-bidi:isolate;
+}
+
+.phone-box{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-size:17px;
+    white-space:nowrap;
+    min-width:max-content;
+}
+
+.whatsapp-icon{
+    width:32px;
+    height:32px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+}
+
+.whatsapp-icon svg{
+    width:32px;
+    height:32px;
+    display:block;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,0.18));
+}
+
+.phone-numbers{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    direction:ltr;
+    unicode-bidi:isolate;
+    white-space:nowrap;
+}
+
+.main-phone{
+    display:inline-block;
+    border:2px solid red;
+    border-radius:999px;
+    padding:2px 8px;
+}
+
+.address-text{
+    text-align:right;
+    direction:rtl;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    line-height:1.5;
+    min-width:0;
+}
+
+.invoice-label{
+    color:#1a4fd8;
+    font-weight:bold;
+}
+
+.invoice-number{
+    color:red;
+    font-weight:bold;
+}
+
+.info{
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    direction:rtl;
+    text-align:right;
+    position:relative;
+    z-index:2;
+}
+
+.info label{
+    font-weight:bold;
+    color:black;
+}
+
+.info span{
+    display:block;
+    min-height:32px;
+    border-bottom:2px solid #c9d8ff;
+    outline:none;
+    padding:4px;
+}
+
+.table-wrapper{
+    width:100%;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+    position:relative;
+    z-index:2;
+}
+
+th{
+    background:linear-gradient(135deg,#1a4fd8,#2e6cff);
+    color:white;
+    padding:10px 6px;
+    border-bottom:2px solid #0d2f8f;
+    font-size:14px;
+}
+
+td{
+    padding:8px 6px;
+    text-align:center;
+    border-bottom:1px solid #e6edff;
+    vertical-align:top;
+    color:#111;
+}
+
+#invoiceTable th:nth-child(1),
+#invoiceTable td:nth-child(1){
+    width:90px;
+    max-width:90px;
+}
+
+#invoiceTable th:nth-child(2),
+#invoiceTable td:nth-child(2){
+    width:60px;
+    max-width:60px;
+}
+
+#invoiceTable th:nth-child(3),
+#invoiceTable td:nth-child(3){
+    width:260px;
+    max-width:260px;
+}
+
+#invoiceTable th:nth-child(4),
+#invoiceTable td:nth-child(4){
+    width:110px;
+    max-width:110px;
+}
+
+.number-cell{
+    direction:rtl;
+    text-align:right;
+    font-weight:bold;
+    width:35px;
+    min-width:35px;
+    max-width:35px;
+    padding:6px;
+}
+
+th:last-child{
+    width:35px;
+    min-width:35px;
+    max-width:35px;
+    padding:6px;
+}
+
+td[contenteditable="true"]{
+    outline:none;
+    white-space:pre-wrap;
+    word-break:break-word;
+    overflow-wrap:anywhere;
+    min-height:30px;
+}
+
+.description-cell{
+    text-align:right;
+    direction:rtl;
+    line-height:1.7;
+}
+
+td[contenteditable="true"]:focus{
+    background:rgba(40,90,220,0.08);
+}
+
+.footer-wrapper{
+    background:#f7f9ff;
+    border-top:2px solid #c9d8ff;
+    padding:22px;
+    position:relative;
+    z-index:2;
+}
+
+.footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:20px;
+    font-weight:bold;
+}
+
+.footer span{
+    display:inline-block;
+    min-width:150px;
+    border-bottom:2px solid #2e6cff;
+    outline:none;
+    padding:4px;
+}
+
+.grand-total-box{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+    direction:rtl;
+}
+
+.total-text{
+    color:#1a4fd8;
+    font-weight:bold;
+    direction:rtl;
+    text-align:right;
+    max-width:420px;
+    line-height:1.7;
+}
+
+.return-text{
+    color:#d11a2a;
+    font-weight:bold;
+    text-align:center;
+    margin-top:18px;
+    font-size:16px;
+}
+
+.buttons{
+    display:flex;
+    gap:10px;
+    padding:20px;
+    flex-wrap:wrap;
+}
+
+.print-btn{
+    padding:12px 22px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#2e6cff,#1a4fd8);
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.25s;
+}
+
+.print-btn:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 25px rgba(40,90,220,0.35);
+}
+
+.back-btn{
+    background:linear-gradient(135deg,#6b7280,#374151);
+}
+
+.dollar-btn{
+    width:48px;
+    height:46px;
+    padding:0;
+    border-radius:50%;
+    font-size:24px;
+    line-height:1;
+    background:linear-gradient(135deg,#17b26a,#087443);
+    box-shadow:0 10px 22px rgba(8,116,67,0.28);
+}
+
+.dollar-btn.active{
+    background:linear-gradient(135deg,#f59e0b,#b45309);
+    box-shadow:0 10px 22px rgba(180,83,9,0.28);
+}
+
+.free-btn{
+    min-width:70px;
+    height:46px;
+    padding:0 16px;
+    border-radius:999px;
+    font-size:15px;
+    background:linear-gradient(135deg,#64748b,#334155);
+    box-shadow:0 10px 22px rgba(51,65,85,0.24);
+}
+
+.free-btn.active{
+    background:linear-gradient(135deg,#ec4899,#be185d);
+    box-shadow:0 10px 22px rgba(190,24,93,0.28);
+}
+
+.free-meter-cell{
+    background:rgba(100,116,139,0.14);
+    color:#94a3b8;
+}
+
+body.pdf-export{
+    background:white;
+    display:block;
+    padding:0;
+    min-height:auto;
+    width:940px;
+}
+
+body.pdf-export .invoice{
+    width:900px;
+    max-width:900px;
+    box-shadow:none;
+    border:1px solid rgba(40,90,200,0.25);
+    border-radius:18px;
+}
+
+body.pdf-export .buttons{
+    display:none !important;
+}
+
+@media(max-width:768px){
+    .invoice::before{
+        font-size:70px;
+        letter-spacing:10px;
+    }
+
+    .center-logo{
+        position:static;
+        transform:none;
+        width:100%;
+        text-align:center;
+    }
+
+    .header{
+        justify-content:center;
+        text-align:center;
+    }
+
+    th,td{
+        font-size:13px;
+        padding:8px 5px;
+    }
+
+    .footer{
+        flex-direction:column;
+    }
+
+    .top-info{
+        grid-template-columns:1fr;
+        justify-items:center;
+        text-align:center;
+        gap:10px;
+    }
+
+    #invoiceNumber{
+        text-align:center;
+    }
+
+    #invoiceDate{
+        justify-content:center;
+    }
+
+    .address-text{
+        text-align:center;
+    }
+
+    .phone-box{
+        font-size:15px;
+    }
+}
+
+@media print{
+    .buttons{
+        display:none;
+    }
+
+    body{
+        background:white;
+        padding:0;
+    }
+
+    .invoice{
+        box-shadow:none;
+        border:none;
+        border-radius:0;
+    }
+}
+</style>
+
+<script src="./vendor/html2canvas.min.js"></script>
+<script src="./vendor/jspdf.umd.min.js"></script>
+<script src="./firebase-data.js"></script>
+</head>
+
+<body>
+
+<div class="invoice" id="invoice">
+
+    <div class="header">
+        <div class="logo-group">
+            <img src="./barcode.jpg" alt="barcode">
+        </div>
+
+        <div class="center-logo">
+            <img src="./logo.jpg" alt="logo">
+        </div>
+
+        <div style="text-align:right;">
+            <div style="font-size:20px;font-weight:bold;">Carpet Invoice</div>
+            <div style="opacity:.85;">Ø¨Û† ÙØ±Û†Ø´ØªÙ†ÛŒ ÙÛ•Ø±Ø´ Ùˆ Ù…Ú©Û†Ú©ÛŽØªÛŒ ØªÙˆØ±Ú©ÛŒ Ùˆ Ú©Ø§Ø±Û† Ù‡Û•ÚµÛ•</div>
+        </div>
+    </div>
+
+    <div class="top-info">
+        <div id="invoiceNumber">
+            <span class="invoice-label">No:</span>
+            <span class="invoice-number">1</span>
+            <div id="invoiceDate"></div>
+        </div>
+
+        <div class="phone-box">
+            <span class="whatsapp-icon" aria-label="WhatsApp">
+                <svg viewBox="0 0 64 64" aria-hidden="true">
+                    <circle cx="32" cy="32" r="30" fill="#25D366"/>
+                    <circle cx="32" cy="32" r="25" fill="none" stroke="#ffffff" stroke-width="3"/>
+                    <path fill="#ffffff" d="M32.1 15.5c-9.1 0-16.5 7.2-16.5 16.1 0 3.1.9 6.1 2.6 8.7l-2.8 8.2 8.6-2.7c2.5 1.3 5.3 2 8.1 2 9.1 0 16.5-7.2 16.5-16.1S41.2 15.5 32.1 15.5zm0 28.9c-2.5 0-4.9-.7-7-2l-.5-.3-5.1 1.6 1.6-4.9-.3-.5c-1.6-2.1-2.4-4.4-2.4-6.8 0-7.1 6.1-12.9 13.6-12.9s13.6 5.8 13.6 12.9-6 12.9-13.5 12.9z"/>
+                    <path fill="#ffffff" d="M39.6 35.4c-.4-.2-2.5-1.2-2.9-1.3-.4-.1-.7-.2-1 .2-.3.4-1.1 1.3-1.4 1.6-.2.3-.5.3-.9.1-.4-.2-1.7-.6-3.3-2-1.2-1.1-2.1-2.4-2.3-2.8-.2-.4 0-.6.2-.8.2-.2.4-.5.6-.7.2-.2.3-.4.4-.7.1-.3.1-.5 0-.7-.1-.2-1-2.4-1.4-3.3-.4-.9-.7-.8-1-.8h-.8c-.3 0-.8.1-1.2.5-.4.4-1.5 1.5-1.5 3.6s1.6 4.1 1.8 4.4c.2.3 3.1 4.7 7.5 6.5 1 .4 1.9.7 2.5.9 1.1.3 2 .3 2.8.2.9-.1 2.5-1 2.9-2 .4-1 .4-1.8.3-2-.2-.3-.5-.5-.9-.7z"/>
+                </svg>
+            </span>
+
+            <span class="phone-numbers">
+                <span class="main-phone">07504019519</span>
+                <span>-</span>
+                <span>07734019519</span>
+            </span>
+        </div>
+
+        <div class="address-text">Ù‡Û•ÙˆÙ„ÛŽØ± -Ù¦Ù  Ù…Û•ØªØ±ÛŒ Ø¨Û•Ø±Ø²Û• Ù¾Ø±Ø¯ÛŒ Ø¹Û•Ù†Ú©Ø§ÙˆÛ•</div>
+    </div>
+
+    <div class="info">
+        <label>Ø¨Û•Ú•ÛŽØ²:</label>
+        <span contenteditable="true"></span>
+
+        <label>Ú˜Ù…Ø§Ø±Û•ÛŒ Ù…Û†Ø¨Ø§ÛŒÙ„:</label>
+        <span contenteditable="true"></span>
+
+        <label>Ù†Ø§ÙˆÙ†ÛŒØ´Ø§Ù†:</label>
+        <span contenteditable="true"></span>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="invoiceTable">
+            <tr>
+                <th>Ù†Ø±Ø®<br><small id="priceCurrencyLabel">Ø¯ÛŒÙ†Ø§Ø±</small></th>
+                <th>Ù…Û•ØªØ±</th>
+                <th>Ù†Ø§ÙˆÛ•Ú•Û†Ú© / Description</th>
+                <th>Ø¨Ú•ÛŒ Ù¾Ø§Ø±Û•<br><small id="amountCurrencyLabel">Ø¯ÛŒÙ†Ø§Ø±</small></th>
+                <th>#</th>
+            </tr>
+
+            <tr>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true" class="description-cell"></td>
+                <td></td>
+                <td class="number-cell">1-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer-wrapper">
+        <div class="footer">
+            <div>
+                Ø¦ÛŒÙ…Ø²Ø§:
+                <span contenteditable="true"></span>
+            </div>
+
+            <div class="grand-total-box">
+                <div>
+                    Ú©Û†ÛŒ Ú¯Ø´ØªÛŒ:
+                    <span id="grandTotal"></span>
+                </div>
+
+                <div class="total-text" id="grandTotalText"></div>
+            </div>
+        </div>
+
+        <div class="return-text">Ù‡Û•ÚµÛ• Ø¯Û•Ú¯Û•Ú•ÛŽØªÛ•ÙˆÛ• Ø¨Û† Ù‡Û•Ø±Ø¯ÙˆÙˆÙ„Ø§</div>
+    </div>
+
+    <div class="buttons">
+        <button class="print-btn back-btn" onclick="goToDashboard()">Back</button>
+        <button class="print-btn" onclick="saveInvoiceAndGoBack()">Save Invoice</button>
+        <button class="print-btn" onclick="window.print()">Print</button>
+        <button class="print-btn dollar-btn" id="currencyToggleBtn" onclick="toggleCurrency()" title="Toggle dollar / dinar">$</button>
+        <button class="print-btn free-btn" id="freeModeBtn" onclick="toggleFreeMode()" title="Toggle free price mode">Free</button>
+    </div>
+
+</div>
+
+<script>
+function goToDashboard(){
+    localStorage.removeItem("editInvoiceNumber");
+    localStorage.removeItem("editInvoiceData");
+    window.location.href = "dashboard.html";
+}
+
+let invoiceNumber = Number(localStorage.getItem("invoiceNumber") || 1);
+let editInvoiceNumber = localStorage.getItem("editInvoiceNumber");
+let editInvoiceData = localStorage.getItem("editInvoiceData");
+let isEditingInvoice = false;
+
+document.getElementById("invoiceNumber").innerHTML =
+    '<span class="invoice-label">No:</span> ' +
+    '<span class="invoice-number">' + invoiceNumber + '</span>' +
+    '<div id="invoiceDate"></div>';
+
+async function initializeInvoicePage(){
+    if(editInvoiceNumber){
+        await loadInvoiceForEditing(editInvoiceNumber);
+        return;
+    }
+
+    invoiceNumber = await SivarFirebase.getNextInvoiceNumber();
+    document.querySelector(".invoice-number").innerText = invoiceNumber;
+}
+
+async function loadInvoiceForEditing(number){
+    const invoices = await SivarFirebase.getInvoices();
+    let invoice = invoices.find(item => Number(item.number) === Number(number));
+
+    if(!invoice && editInvoiceData){
+        try{
+            invoice = JSON.parse(editInvoiceData);
+        }catch(error){
+            invoice = null;
+        }
+    }
+
+    if(!invoice){
+        localStorage.removeItem("editInvoiceNumber");
+        localStorage.removeItem("editInvoiceData");
+        invoiceNumber = await SivarFirebase.getNextInvoiceNumber();
+        document.querySelector(".invoice-number").innerText = invoiceNumber;
+        return;
+    }
+
+    isEditingInvoice = true;
+    invoiceNumber = Number(invoice.number);
+    document.querySelector(".invoice-number").innerText = invoiceNumber;
+    setInvoiceDateEditable(true);
+    applyInvoiceToForm(invoice);
+}
+
+const today = new Date();
+
+const yyyy = today.getFullYear();
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const dd = String(today.getDate()).padStart(2, '0');
+
+const kurdishDays = [
+    "ÛŒÛ•Ú©Ø´Û•Ù…Ù…Û•",
+    "Ø¯ÙˆÙˆØ´Û•Ù…Ù…Û•",
+    "Ø³ÛŽØ´Û•Ù…Ù…Û•",
+    "Ú†ÙˆØ§Ø±Ø´Û•Ù…Ù…Û•",
+    "Ù¾ÛŽÙ†Ø¬Ø´Û•Ù…Ù…Û•",
+    "Ù‡Û•ÛŒÙ†ÛŒ",
+    "Ø´Û•Ù…Ù…Û•"
+];
+
+const kurdishDay = kurdishDays[today.getDay()];
+
+document.getElementById("invoiceDate").innerHTML =
+    '<span class="date-number">' + yyyy + "/" + mm + "/" + dd + '</span>' +
+    '<span class="date-day">' + kurdishDay + '</span>';
+
+const table = document.getElementById("invoiceTable");
+let currencyMode = "IQD";
+let isFreeMode = false;
+const descriptionLineLength = 65;
+
+function setInvoiceDateEditable(isEditable){
+    const invoiceDate = document.getElementById("invoiceDate");
+
+    invoiceDate.contentEditable = isEditable ? "true" : "false";
+    invoiceDate.title = isEditable ? "Edit invoice date" : "";
+}
+
+async function downloadPDF(){
+    const buttons = document.querySelector(".buttons");
+
+    try{
+        const { jsPDF } = window.jspdf;
+        const element = document.getElementById("invoice");
+
+        removeEmptyRowsForPdf();
+
+        buttons.style.display = "none";
+        document.body.classList.add("pdf-export");
+
+        await new Promise(resolve => setTimeout(resolve, 400));
+
+        const canvas = await html2canvas(element,{
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 940,
+            windowHeight: element.scrollHeight
+        });
+
+        document.body.classList.remove("pdf-export");
+        buttons.style.display = "flex";
+
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const margin = 6;
+        const usableWidth = pageWidth - margin * 2;
+        const usableHeight = pageHeight - margin * 2;
+
+        let imgWidth = usableWidth;
+        let imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        if(imgHeight > usableHeight){
+            imgHeight = usableHeight;
+            imgWidth = (canvas.width * imgHeight) / canvas.height;
+        }
+
+        const x = (pageWidth - imgWidth) / 2;
+        const y = (pageHeight - imgHeight) / 2;
+
+        pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
+
+        const fileName = "carpet-invoice-" + invoiceNumber + ".pdf";
+        const pdfBlob = pdf.output("blob");
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        const link = document.createElement("a");
+        link.href = pdfUrl;
+        link.download = fileName;
+        link.style.display = "none";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        await saveInvoiceToOldInvoices();
+
+        setTimeout(function(){
+            URL.revokeObjectURL(pdfUrl);
+            window.location.reload();
+        }, 1000);
+
+    }catch(error){
+        console.error(error);
+        document.body.classList.remove("pdf-export");
+        buttons.style.display = "flex";
+        alert("PDF Error");
+    }
+}
+
+async function saveInvoiceAndGoBack(){
+    try{
+        await saveInvoiceToOldInvoices();
+        window.location.href = "old-invoices.html";
+    }catch(error){
+        console.error(error);
+        alert("Invoice save error");
+    }
+}
+
+async function saveInvoiceToOldInvoices(){
+    let invoices = await SivarFirebase.getInvoices();
+
+    const invoice = {
+        number: invoiceNumber,
+        date: document.getElementById("invoiceDate").innerText,
+        customerName: document.querySelectorAll(".info span")[0].innerText.trim(),
+        phone: document.querySelectorAll(".info span")[1].innerText.trim(),
+        address: document.querySelectorAll(".info span")[2].innerText.trim(),
+        currency: currencyMode,
+        freeMode: isFreeMode,
+        total: document.getElementById("grandTotal").innerText.trim(),
+        totalText: document.getElementById("grandTotalText").innerText.trim(),
+        items:
+            Array.from(document.querySelectorAll("#invoiceTable tr"))
+            .slice(1)
+            .filter(row => rowHasText(row))
+            .map(row => ({
+                price: row.cells[0].innerText.trim(),
+                meter: row.cells[1].innerText.trim(),
+                description: row.cells[2].innerText.trim(),
+                amount: row.cells[3].innerText.trim()
+            }))
+    };
+
+    const existingIndex = invoices.findIndex(item => Number(item.number) === Number(invoiceNumber));
+
+    if(existingIndex >= 0){
+        invoices[existingIndex] = invoice;
+        await SivarFirebase.saveInvoices(invoices);
+        localStorage.removeItem("editInvoiceNumber");
+        localStorage.removeItem("editInvoiceData");
+        return;
+    }
+
+    invoices.push(invoice);
+    await SivarFirebase.saveInvoices(invoices);
+
+    if(!isEditingInvoice){
+        await SivarFirebase.setNextInvoiceNumber(invoiceNumber + 1);
+    }
+
+    localStorage.removeItem("editInvoiceNumber");
+    localStorage.removeItem("editInvoiceData");
+}
+
+function cleanNumberText(text){
+    return text.replace(/[^\d.]/g, "");
+}
+
+function parseMoney(text){
+    return parseFloat(cleanNumberText(text)) || 0;
+}
+
+function formatMoney(value){
+    if(!value) return "";
+
+    if(currencyMode === "USD"){
+        return "$" + value.toLocaleString();
+    }
+
+    return value.toLocaleString();
+}
+
+function numberToKurdish(num, currency){
+    num = parseInt(num);
+
+    if(!num) return "";
+
+    const ones = ["","ÛŒÛ•Ú©","Ø¯ÙˆÙˆ","Ø³ÛŽ","Ú†ÙˆØ§Ø±","Ù¾ÛŽÙ†Ø¬","Ø´Û•Ø´","Ø­Û•ÙˆØª","Ù‡Û•Ø´Øª","Ù†Û†"];
+    const teens = ["Ø¯Û•","ÛŒØ§Ø²Ø¯Û•","Ø¯ÙˆØ§Ø²Ø¯Û•","Ø³ÛŽØ²Ø¯Û•","Ú†ÙˆØ§Ø±Ø¯Û•","Ù¾Ø§Ø²Ø¯Û•","Ø´Ø§Ø²Ø¯Û•","Ø­Û•Ú¤Ø¯Û•","Ù‡Û•Ú˜Ø¯Û•","Ù†Û†Ø²Ø¯Û•"];
+    const tens = ["","","Ø¨ÛŒØ³Øª","Ø³ÛŒ","Ú†Ù„","Ù¾Û•Ù†Ø¬Ø§","Ø´Û•Ø³Øª","Ø­Û•ÙØªØ§","Ù‡Û•Ø´ØªØ§","Ù†Û•ÙˆÛ•Ø¯"];
+
+    function underHundred(n){
+        if(n < 10) return ones[n];
+        if(n < 20) return teens[n - 10];
+
+        const ten = Math.floor(n / 10);
+        const one = n % 10;
+
+        return tens[ten] + (one ? " Ùˆ " + ones[one] : "");
+    }
+
+    function underThousand(n){
+        const hundred = Math.floor(n / 100);
+        const rest = n % 100;
+
+        let text = "";
+
+        if(hundred){
+            text += hundred === 1 ? "Ø³Û•Ø¯" : ones[hundred] + " Ø³Û•Ø¯";
+        }
+
+        if(rest){
+            text += (text ? " Ùˆ " : "") + underHundred(rest);
+        }
+
+        return text;
+    }
+
+    function convert(n){
+        if(n < 1000) return underThousand(n);
+
+        if(n < 1000000){
+            const thousand = Math.floor(n / 1000);
+            const rest = n % 1000;
+
+            return convert(thousand) + " Ù‡Û•Ø²Ø§Ø±" + (rest ? " Ùˆ " + convert(rest) : "");
+        }
+
+        if(n < 1000000000){
+            const million = Math.floor(n / 1000000);
+            const rest = n % 1000000;
+
+            return convert(million) + " Ù…Ù„ÛŒÛ†Ù†" + (rest ? " Ùˆ " + convert(rest) : "");
+        }
+
+        const billion = Math.floor(n / 1000000000);
+        const rest = n % 1000000000;
+
+        return convert(billion) + " Ù…Ù„ÛŒØ§Ø±" + (rest ? " Ùˆ " + convert(rest) : "");
+    }
+
+    return convert(num) + " " + currency;
+}
+
+function getCurrencyName(){
+    return currencyMode === "USD" ? "Ø¯Û†Ù„Ø§Ø±" : "Ø¯ÛŒÙ†Ø§Ø±";
+}
+
+function updateCurrencyUI(){
+    const isDollar = currencyMode === "USD";
+    const button = document.getElementById("currencyToggleBtn");
+
+    document.getElementById("priceCurrencyLabel").innerText =
+        isDollar ? "Ø¯Û†Ù„Ø§Ø±" : "Ø¯ÛŒÙ†Ø§Ø±";
+
+    document.getElementById("amountCurrencyLabel").innerText =
+        isDollar ? "Ø¯Û†Ù„Ø§Ø±" : "Ø¯ÛŒÙ†Ø§Ø±";
+
+    button.innerText = isDollar ? "Ø¯" : "$";
+    button.classList.toggle("active", isDollar);
+    button.title = isDollar ? "Change to dinar" : "Change to dollar";
+}
+
+function toggleCurrency(){
+    currencyMode = currencyMode === "IQD" ? "USD" : "IQD";
+
+    updateCurrencyUI();
+
+    Array.from(table.querySelectorAll("tr"))
+        .slice(1)
+        .forEach(row => calculateRow(row));
+}
+
+function updateFreeModeUI(){
+    const button = document.getElementById("freeModeBtn");
+
+    button.classList.toggle("active", isFreeMode);
+    button.title = isFreeMode ? "Free mode is on" : "Free mode is off";
+
+    Array.from(table.querySelectorAll("tr"))
+        .slice(1)
+        .forEach(row => {
+            const meterCell = row.cells[1];
+            meterCell.contentEditable = isFreeMode ? "false" : "true";
+            meterCell.classList.toggle("free-meter-cell", isFreeMode);
+        });
+}
+
+function toggleFreeMode(){
+    isFreeMode = !isFreeMode;
+    updateFreeModeUI();
+
+    Array.from(table.querySelectorAll("tr"))
+        .slice(1)
+        .forEach(row => calculateRow(row));
+}
+
+function calculateGrandTotal(){
+    let grandTotal = 0;
+
+    const rows = table.querySelectorAll("tr");
+
+    rows.forEach((row,index)=>{
+        if(index === 0) return;
+
+        const totalCell = row.cells[3];
+        const value = parseMoney(totalCell.innerText);
+
+        grandTotal += value;
+    });
+
+    document.getElementById("grandTotal").innerText = formatMoney(grandTotal);
+
+    document.getElementById("grandTotalText").innerText =
+        grandTotal ? numberToKurdish(grandTotal, getCurrencyName()) : "";
+}
+
+function calculateRow(row){
+    const price = parseMoney(row.cells[0].innerText);
+    const meter = parseMoney(row.cells[1].innerText);
+    const total = isFreeMode ? price : price * meter;
+
+    row.cells[3].innerText = formatMoney(total);
+
+    calculateGrandTotal();
+}
+
+function moveCursorToEnd(cell){
+    const range = document.createRange();
+    const selection = window.getSelection();
+
+    range.selectNodeContents(cell);
+    range.collapse(false);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+}
+
+function formatDescriptionCell(cell){
+    const rawText = cell.innerText.replace(/\r/g, "").replace(/\n/g, "");
+    const parts = rawText.match(new RegExp(".{1," + descriptionLineLength + "}", "g")) || [];
+    const formattedText = parts.join("\n");
+
+    if(cell.innerText !== formattedText){
+        cell.innerText = formattedText;
+        moveCursorToEnd(cell);
+    }
+}
+
+function limitCell(cell, maxLength, numbersOnly){
+    let text = cell.innerText;
+
+    if(numbersOnly){
+        text = text.replace(/[^\d.]/g, "");
+    }
+
+    if(text.length > maxLength){
+        text = text.slice(0, maxLength);
+    }
+
+    if(cell.innerText !== text){
+        cell.innerText = text;
+        moveCursorToEnd(cell);
+    }
+}
+
+function rowHasText(row){
+    return (
+        row.cells[0].innerText.trim() ||
+        row.cells[1].innerText.trim() ||
+        row.cells[2].innerText.trim()
+    );
+}
+
+function setEditableText(element, value){
+    element.innerText = value || "";
+}
+
+function applyInvoiceToForm(invoice){
+    const infoFields = document.querySelectorAll(".info span");
+
+    setEditableText(infoFields[0], invoice.customerName);
+    setEditableText(infoFields[1], invoice.phone);
+    setEditableText(infoFields[2], invoice.address);
+
+    currencyMode = invoice.currency || "IQD";
+    isFreeMode = Boolean(invoice.freeMode);
+    updateCurrencyUI();
+
+    if(invoice.date){
+        document.getElementById("invoiceDate").innerText = invoice.date;
+    }
+
+    rebuildInvoiceRows(invoice.items || []);
+}
+
+function rebuildInvoiceRows(items){
+    Array.from(table.querySelectorAll("tr"))
+        .slice(1)
+        .forEach(row => row.remove());
+
+    const invoiceItems = items.length ? items : [{ price:"", meter:"", description:"", amount:"" }];
+
+    invoiceItems.forEach((item,index)=>{
+        const row = table.insertRow();
+
+        row.innerHTML = `
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true" class="description-cell"></td>
+            <td></td>
+            <td class="number-cell">${index + 1}-</td>
+        `;
+
+        row.cells[0].innerText = item.price || "";
+        row.cells[1].innerText = item.meter || "";
+        row.cells[2].innerText = item.description || "";
+        row.cells[3].innerText = item.amount || "";
+
+        attachEvents(row);
+    });
+
+    renumberRows();
+    updateFreeModeUI();
+
+    Array.from(table.querySelectorAll("tr"))
+        .slice(1)
+        .forEach(row => calculateRow(row));
+}
+
+function renumberRows(){
+    Array.from(table.querySelectorAll("tr"))
+        .slice(1)
+        .forEach((row,index)=>{
+            row.cells[4].innerText = (index + 1) + "-";
+        });
+}
+
+function removeEmptyRowsForPdf(){
+    const rows = Array.from(table.querySelectorAll("tr")).slice(1);
+
+    rows.forEach(row=>{
+        if(table.rows.length > 2 && !rowHasText(row)){
+            row.remove();
+        }
+    });
+
+    renumberRows();
+    calculateGrandTotal();
+}
+
+function attachEvents(row){
+    const editableCells = row.querySelectorAll('td[contenteditable="true"]');
+
+    editableCells.forEach((cell,index)=>{
+        cell.addEventListener("input",()=>{
+            if(index === 0){
+                limitCell(cell, 8, true);
+            }
+
+            if(index === 1){
+                limitCell(cell, 4, true);
+            }
+
+            if(index === 2){
+                formatDescriptionCell(cell);
+            }
+
+            calculateRow(row);
+        });
+
+        cell.addEventListener("keydown",(e)=>{
+            if(e.key === "Enter"){
+                e.preventDefault();
+
+                const rows = table.querySelectorAll("tr");
+                const lastRow = rows[rows.length - 1];
+
+                if(row === lastRow){
+                    addNewRow();
+                }
+            }
+        });
+    });
+}
+
+function addNewRow(){
+    const rowCount = table.rows.length;
+
+    const newRow = table.insertRow();
+
+    newRow.innerHTML = `
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true" class="description-cell"></td>
+        <td></td>
+        <td class="number-cell">${rowCount}-</td>
+    `;
+
+    attachEvents(newRow);
+    renumberRows();
+    updateFreeModeUI();
+    calculateRow(newRow);
+}
+
+updateCurrencyUI();
+updateFreeModeUI();
+attachEvents(table.rows[1]);
+initializeInvoicePage();
+</script>
+
+</body>
+</html>
+

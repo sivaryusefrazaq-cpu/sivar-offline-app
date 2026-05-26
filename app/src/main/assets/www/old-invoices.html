@@ -1,0 +1,745 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Old Invoices</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+    font-family:'Segoe UI',sans-serif;
+    background:radial-gradient(circle at top left,#4f46e5,#111827 55%),linear-gradient(135deg,#0f172a,#1e293b);
+    min-height:100vh;
+    padding:30px;
+    color:#fff;
+}
+
+.top-bar{display:flex;gap:15px;margin-bottom:25px;flex-wrap:wrap;}
+
+.search-box{
+    flex:1;
+    min-width:250px;
+    height:55px;
+    border:none;
+    outline:none;
+    border-radius:18px;
+    padding:0 20px;
+    font-size:16px;
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.15);
+}
+
+.search-box::placeholder{color:rgba(255,255,255,0.6);}
+
+.back-btn{
+    height:55px;
+    padding:0 28px;
+    border:none;
+    border-radius:18px;
+    background:linear-gradient(135deg,#6366f1,#06b6d4);
+    color:#fff;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.page-title{font-size:38px;font-weight:700;margin-bottom:25px;}
+
+.invoice-list{display:flex;flex-direction:column;gap:20px;}
+
+.invoice-card{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:24px;
+    padding:22px;
+}
+
+.invoice-top{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+}
+
+.invoice-number{font-size:24px;font-weight:700;}
+.invoice-date{color:rgba(255,255,255,0.7);}
+
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:14px;
+    margin-bottom:20px;
+}
+
+.info-box{
+    background:rgba(255,255,255,0.06);
+    padding:14px;
+    border-radius:16px;
+}
+
+.info-label{
+    font-size:13px;
+    color:rgba(255,255,255,0.6);
+    margin-bottom:6px;
+}
+
+.info-value{font-size:17px;font-weight:600;}
+
+.button-row{display:flex;gap:12px;flex-wrap:wrap;}
+
+.action-btn{
+    flex:1;
+    min-width:140px;
+    height:50px;
+    border:none;
+    border-radius:16px;
+    font-size:15px;
+    font-weight:700;
+    color:#fff;
+    cursor:pointer;
+}
+
+.view-btn{background:linear-gradient(135deg,#6366f1,#06b6d4);}
+.edit-btn{background:linear-gradient(135deg,#f59e0b,#d97706);}
+.download-btn{background:linear-gradient(135deg,#10b981,#06b6d4);}
+.delete-btn{background:linear-gradient(135deg,#ef4444,#dc2626);}
+
+.empty-box{
+    text-align:center;
+    padding:80px 20px;
+    color:rgba(255,255,255,0.7);
+    font-size:20px;
+}
+</style>
+
+<script src="./vendor/html2canvas.min.js"></script>
+<script src="./vendor/jspdf.umd.min.js"></script>
+<script src="./firebase-data.js"></script>
+
+</head>
+
+<body>
+
+<div class="top-bar">
+    <input type="text" id="searchInput" class="search-box" placeholder="Search by invoice number, name or phone...">
+
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">
+        Back To Dashboard
+    </button>
+</div>
+
+<h1 class="page-title">Old Invoices</h1>
+
+<div class="invoice-list" id="invoiceList"></div>
+
+<script>
+
+const invoiceList = document.getElementById("invoiceList");
+const searchInput = document.getElementById("searchInput");
+
+let invoices = JSON.parse(localStorage.getItem("invoices")) || [];
+
+loadInvoices();
+
+async function loadInvoices(){
+    invoices = await SivarFirebase.getInvoices();
+    renderInvoices(invoices);
+}
+
+function numberToKurdish(num){
+
+    num = Number(String(num).replace(/,/g,'')) || 0;
+
+    const ones = ["","ÛŒÛ•Ú©","Ø¯ÙˆÙˆ","Ø³ÛŽ","Ú†ÙˆØ§Ø±","Ù¾ÛŽÙ†Ø¬","Ø´Û•Ø´","Ø­Û•ÙˆØª","Ù‡Û•Ø´Øª","Ù†Û†"];
+    const teens = ["Ø¯Û•","ÛŒØ§Ø²Ø¯Û•","Ø¯ÙˆØ§Ø²Ø¯Û•","Ø³ÛŒØ§Ø²Ø¯Û•","Ú†ÙˆØ§Ø±Ø¯Û•","Ù¾Ø§Ø²Ø¯Û•","Ø´Ø§Ø²Ø¯Û•","Ø­Û•Ú¤Ø¯Û•","Ù‡Û•Ú˜Ø¯Û•","Ù†Û†Ø²Ø¯Û•"];
+    const tens = ["","","Ø¨ÛŒØ³Øª","Ø³ÛŒ","Ú†Ù„","Ù¾Û•Ù†Ø¬Ø§","Ø´Û•Ø³Øª","Ø­Û•ÙØªØ§","Ù‡Û•Ø´ØªØ§","Ù†Û•ÙˆÛ•Ø¯"];
+
+    if(num === 0) return "";
+    if(num < 10) return ones[num];
+    if(num < 20) return teens[num - 10];
+
+    if(num < 100){
+        const t = Math.floor(num / 10);
+        const o = num % 10;
+        return o === 0 ? tens[t] : tens[t] + " Ùˆ " + ones[o];
+    }
+
+    if(num < 1000){
+        const h = Math.floor(num / 100);
+        const rest = num % 100;
+        let text = h === 1 ? "Ø³Û•Ø¯" : ones[h] + " Ø³Û•Ø¯";
+        if(rest > 0) text += " Ùˆ " + numberToKurdish(rest);
+        return text;
+    }
+
+    if(num < 1000000){
+        const th = Math.floor(num / 1000);
+        const rest = num % 1000;
+        let text = numberToKurdish(th) + " Ù‡Û•Ø²Ø§Ø±";
+        if(rest > 0) text += " Ùˆ " + numberToKurdish(rest);
+        return text;
+    }
+
+    if(num < 1000000000){
+        const mil = Math.floor(num / 1000000);
+        const rest = num % 1000000;
+        let text = numberToKurdish(mil) + " Ù…Ù„ÛŒÛ†Ù†";
+        if(rest > 0) text += " Ùˆ " + numberToKurdish(rest);
+        return text;
+    }
+
+    return num.toLocaleString();
+}
+
+function renderInvoices(data){
+
+    invoiceList.innerHTML = "";
+
+    if(data.length === 0){
+        invoiceList.innerHTML = `<div class="empty-box">No invoices found</div>`;
+        return;
+    }
+
+    [...data].reverse().forEach((invoice)=>{
+
+        const card = document.createElement("div");
+        card.className = "invoice-card";
+
+        card.innerHTML = `
+            <div class="invoice-top">
+                <div class="invoice-number">No: ${invoice.number}</div>
+                <div class="invoice-date">${invoice.date}</div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="info-label">Customer Name</div>
+                    <div class="info-value">${invoice.customerName || "-"}</div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value">${invoice.phone || "-"}</div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-label">Address</div>
+                    <div class="info-value">${invoice.address || "-"}</div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-label">Total</div>
+                    <div class="info-value">${invoice.total || "-"}</div>
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button class="action-btn view-btn" onclick="viewInvoice(${invoice.number})">View Invoice</button>
+                <button class="action-btn edit-btn" onclick="editInvoice(${invoice.number})">Edit</button>
+                <button class="action-btn download-btn" onclick="downloadInvoicePDF(${invoice.number})">Download PDF</button>
+                <button class="action-btn delete-btn" onclick="deleteInvoice(${invoice.number})">Delete</button>
+            </div>
+        `;
+
+        invoiceList.appendChild(card);
+    });
+}
+
+function generateInvoiceHTML(invoice){
+
+    const kurdishTotal = numberToKurdish(invoice.total || 0);
+
+    return `
+    <div id="invoiceDesign" style="
+        width:900px;
+        min-height:1273px;
+        background:white;
+        border-radius:18px;
+        overflow:hidden;
+        position:relative;
+        border:1px solid rgba(40,90,200,0.25);
+        font-family:'Segoe UI',sans-serif;
+        display:flex;
+        flex-direction:column;
+    ">
+
+        <div style="
+            position:absolute;
+            top:50%;
+            left:50%;
+            transform:translate(-50%,-50%) rotate(-30deg);
+            font-size:140px;
+            font-weight:900;
+            letter-spacing:20px;
+            opacity:0.08;
+            color:#1a4fd8;
+            z-index:0;
+            pointer-events:none;
+        ">SIVAR</div>
+
+        <div style="
+            background:linear-gradient(135deg,#1a4fd8,#0d2f8f);
+            color:white;
+            padding:20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            border-bottom:3px solid #4f7fff;
+            position:relative;
+            z-index:2;
+        ">
+
+            <div>
+                <img src="./barcode.jpg" style="height:60px;background:white;padding:5px;border-radius:10px;object-fit:contain;">
+            </div>
+
+            <div style="position:absolute;left:50%;transform:translateX(-50%);">
+                <img src="./logo.jpg" style="height:75px;background:white;padding:6px;border-radius:12px;object-fit:contain;">
+            </div>
+
+            <div style="text-align:right;">
+                <div style="font-size:20px;font-weight:bold;">Carpet Invoice</div>
+                <div style="opacity:.85;">Ø¨Û† ÙØ±Û†Ø´ØªÙ†ÛŒ ÙÛ•Ø±Ø´ Ùˆ Ù…Û†Ú©ÛŽÙ†ÛŒ</div>
+            </div>
+        </div>
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:12px 20px;
+            background:#f3f7ff;
+            font-weight:bold;
+            color:#1a2a55;
+            border-bottom:1px solid #dbe5ff;
+            position:relative;
+            z-index:2;
+        ">
+
+            <div>
+                <span style="color:#1a4fd8;font-weight:bold;">No:</span>
+                <span style="color:red;font-weight:bold;">${invoice.number}</span>
+                <div style="font-size:13px;opacity:0.8;margin-top:3px;">${invoice.date}</div>
+            </div>
+
+            <div style="
+                position:absolute;
+                left:50%;
+                transform:translateX(-50%);
+                display:flex;
+                align-items:center;
+                gap:8px;
+                font-size:17px;
+            ">
+                <span style="width:22px;height:22px;border-radius:50%;background:#25D366;color:white;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;">W</span>
+                <span>
+                    <span style="display:inline-block;border:2px solid red;border-radius:999px;padding:2px 8px;">
+                        07504019519
+                    </span>
+                    - 07734019519
+                </span>
+            </div>
+
+            <div style="margin-left:auto;">Ù‡Û•ÙˆÙ„ÛŽØ± -Ù¦Ù  Ù…Û•ØªØ±ÛŒ Ø¨Û•Ø±Ø²Û• Ù¾Ø±Ø¯ÛŒ Ø¹Û•Ù†Ú©Ø§ÙˆÛ•</div>
+        </div>
+
+        <div style="
+            padding:22px;
+            display:flex;
+            flex-direction:column;
+            gap:14px;
+            direction:rtl;
+            text-align:right;
+            position:relative;
+            z-index:2;
+            color:black;
+        ">
+            <label style="font-weight:bold;color:black;">Ø¨Û•Ú•ÛŽØ²:</label>
+            <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${invoice.customerName || ""}</span>
+
+            <label style="font-weight:bold;color:black;">Ú˜Ù…Ø§Ø±Û•ÛŒ Ù…Û†Ø¨Ø§ÛŒÙ„:</label>
+            <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${invoice.phone || ""}</span>
+
+            <label style="font-weight:bold;color:black;">Ù†Ø§ÙˆÙ†ÛŒØ´Ø§Ù†:</label>
+            <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${invoice.address || ""}</span>
+        </div>
+
+        <div style="flex:1;position:relative;z-index:2;">
+            <table style="
+                width:100%;
+                border-collapse:collapse;
+                table-layout:fixed;
+                color:#111;
+            ">
+                <tr>
+                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">Ù†Ø±Ø®<br><small>Ø¯ÛŒÙ†Ø§Ø± / Ø¯Û†Ù„Ø§Ø±</small></th>
+                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">Ù…Û•ØªØ±</th>
+                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">Ù†Ø§ÙˆÛ•Ú•Û†Ú© / Description</th>
+                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:12px;border-bottom:2px solid #0d2f8f;">Ø¨Ú•ÛŒ Ù¾Ø§Ø±Û•<br><small>Ø¯ÛŒÙ†Ø§Ø± / Ø¯Û†Ù„Ø§Ø±</small></th>
+                    <th style="background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:6px;border-bottom:2px solid #0d2f8f;width:35px;">#</th>
+                </tr>
+
+                ${
+                    invoice.items && invoice.items.length > 0
+                    ? invoice.items.map((item,index)=>`
+                        <tr>
+                            <td style="padding:10px;text-align:center;border-bottom:1px solid #e6edff;vertical-align:top;">${item.price || ""}</td>
+                            <td style="padding:10px;text-align:center;border-bottom:1px solid #e6edff;vertical-align:top;">${item.meter || ""}</td>
+                            <td style="padding:10px;text-align:center;border-bottom:1px solid #e6edff;vertical-align:top;white-space:pre-wrap;word-break:break-word;">${item.description || ""}</td>
+                            <td style="padding:10px;text-align:center;border-bottom:1px solid #e6edff;vertical-align:top;">${item.amount || ""}</td>
+                            <td style="direction:rtl;text-align:right;font-weight:bold;width:35px;padding:6px;border-bottom:1px solid #e6edff;">${index + 1}-</td>
+                        </tr>
+                    `).join("")
+                    : `
+                        <tr>
+                            <td style="padding:10px;text-align:center;border-bottom:1px solid #e6edff;"></td>
+                            <td style="padding:10px;text-align:center;border-bottom:1px solid #e6edff;"></td>
+                            <td style="padding:10px;text-align:center;border-bottom:1px solid #e6edff;"></td>
+                            <td style="padding:10px;text-align:center;border-bottom:1px solid #e6edff;"></td>
+                            <td style="direction:rtl;text-align:right;font-weight:bold;width:35px;padding:6px;border-bottom:1px solid #e6edff;">1-</td>
+                        </tr>
+                    `
+                }
+            </table>
+        </div>
+
+        <div style="
+            background:#f7f9ff;
+            border-top:2px solid #c9d8ff;
+            padding:22px;
+            position:relative;
+            z-index:2;
+            color:black;
+            margin-top:auto;
+        ">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                flex-wrap:wrap;
+                gap:20px;
+                font-weight:bold;
+            ">
+
+                <div>
+                    Ø¦ÛŒÙ…Ø²Ø§:
+                    <span style="display:inline-block;min-width:150px;border-bottom:2px solid #2e6cff;padding:4px;"></span>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;">
+                    <div style="color:#1a4fd8;font-weight:bold;">${kurdishTotal}</div>
+
+                    <div>
+                        Ú©Û†ÛŒ Ú¯Ø´ØªÛŒ:
+                        <span style="display:inline-block;min-width:150px;border-bottom:2px solid #2e6cff;padding:4px;">
+                            ${invoice.total || ""}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="
+                color:#d11a2a;
+                font-weight:bold;
+                text-align:center;
+                margin-top:18px;
+                font-size:16px;
+            ">
+                Ù‡Û•ÚµÛ• Ø¯Û•Ú¯Û•Ú•ÛŽØªÛ•ÙˆÛ• Ø¨Û† Ù‡Û•Ø±Ø¯ÙˆÙˆÙ„Ø§
+            </div>
+        </div>
+    </div>
+    `;
+}
+
+function escapeHTML(value){
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function getCurrencyLabel(invoice){
+    return invoice.currency === "USD" ? "Ø¯Û†Ù„Ø§Ø±" : "Ø¯ÛŒÙ†Ø§Ø±";
+}
+
+function generateInvoiceHTMLV2(invoice){
+    const currencyLabel = getCurrencyLabel(invoice);
+    const kurdishTotal = invoice.totalText || numberToKurdish(invoice.total || 0);
+    const items = invoice.items && invoice.items.length
+        ? invoice.items
+        : [{ price:"", meter:"", description:"", amount:"" }];
+
+    return `
+    <div id="invoiceDesign" style="
+        width:900px;
+        max-width:900px;
+        background:white;
+        border-radius:18px;
+        box-shadow:none;
+        overflow:hidden;
+        position:relative;
+        border:1px solid rgba(40,90,200,0.25);
+        font-family:Tahoma, Arial, 'Segoe UI', sans-serif;
+        color:#111;
+    ">
+        <div style="
+            position:absolute;
+            top:50%;
+            left:50%;
+            transform:translate(-50%,-50%) rotate(-30deg);
+            font-size:140px;
+            font-weight:900;
+            letter-spacing:20px;
+            color:rgba(30,90,220,0.10);
+            z-index:0;
+            pointer-events:none;
+        ">SIVAR</div>
+
+        <div style="
+            background:linear-gradient(135deg,#1a4fd8,#0d2f8f);
+            color:white;
+            padding:20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            border-bottom:3px solid #4f7fff;
+            position:relative;
+            z-index:2;
+            flex-wrap:wrap;
+            gap:15px;
+        ">
+            <div>
+                <img src="./barcode.jpg" style="height:60px;background:white;padding:5px;border-radius:10px;object-fit:contain;">
+            </div>
+
+            <div style="position:absolute;left:50%;transform:translateX(-50%);">
+                <img src="./logo.jpg" style="height:75px;background:white;padding:6px;border-radius:12px;object-fit:contain;">
+            </div>
+
+            <div style="text-align:right;">
+                <div style="font-size:20px;font-weight:bold;">Carpet Invoice</div>
+                <div style="opacity:.85;">Ø¨Û† ÙØ±Û†Ø´ØªÙ†ÛŒ ÙÛ•Ø±Ø´ Ùˆ Ù…Ú©Û†Ú©ÛŽØªÛŒ ØªÙˆØ±Ú©ÛŒ Ùˆ Ú©Ø§Ø±Û† Ù‡Û•ÚµÛ•</div>
+            </div>
+        </div>
+
+        <div style="
+            display:grid;
+            grid-template-columns:max-content max-content minmax(0,1fr);
+            align-items:center;
+            gap:14px;
+            padding:12px 16px;
+            background:#f3f7ff;
+            font-weight:bold;
+            color:#1a2a55;
+            border-bottom:1px solid #dbe5ff;
+            position:relative;
+            z-index:2;
+        ">
+            <div style="min-width:170px;">
+                <span style="color:#1a4fd8;font-weight:bold;">No:</span>
+                <span style="color:red;font-weight:bold;">${escapeHTML(invoice.number)}</span>
+                <div style="font-size:13px;opacity:0.85;margin-top:3px;display:flex;align-items:center;gap:6px;direction:ltr;white-space:nowrap;">
+                    ${escapeHTML(invoice.date)}
+                </div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:17px;white-space:nowrap;min-width:max-content;">
+                <span style="width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;">
+                    <svg viewBox="0 0 64 64" style="width:32px;height:32px;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.18));">
+                        <circle cx="32" cy="32" r="30" fill="#25D366"/>
+                        <circle cx="32" cy="32" r="25" fill="none" stroke="#ffffff" stroke-width="3"/>
+                        <path fill="#ffffff" d="M32.1 15.5c-9.1 0-16.5 7.2-16.5 16.1 0 3.1.9 6.1 2.6 8.7l-2.8 8.2 8.6-2.7c2.5 1.3 5.3 2 8.1 2 9.1 0 16.5-7.2 16.5-16.1S41.2 15.5 32.1 15.5zm0 28.9c-2.5 0-4.9-.7-7-2l-.5-.3-5.1 1.6 1.6-4.9-.3-.5c-1.6-2.1-2.4-4.4-2.4-6.8 0-7.1 6.1-12.9 13.6-12.9s13.6 5.8 13.6 12.9-6 12.9-13.5 12.9z"/>
+                        <path fill="#ffffff" d="M39.6 35.4c-.4-.2-2.5-1.2-2.9-1.3-.4-.1-.7-.2-1 .2-.3.4-1.1 1.3-1.4 1.6-.2.3-.5.3-.9.1-.4-.2-1.7-.6-3.3-2-1.2-1.1-2.1-2.4-2.3-2.8-.2-.4 0-.6.2-.8.2-.2.4-.5.6-.7.2-.2.3-.4.4-.7.1-.3.1-.5 0-.7-.1-.2-1-2.4-1.4-3.3-.4-.9-.7-.8-1-.8h-.8c-.3 0-.8.1-1.2.5-.4.4-1.5 1.5-1.5 3.6s1.6 4.1 1.8 4.4c.2.3 3.1 4.7 7.5 6.5 1 .4 1.9.7 2.5.9 1.1.3 2 .3 2.8.2.9-.1 2.5-1 2.9-2 .4-1 .4-1.8.3-2-.2-.3-.5-.5-.9-.7z"/>
+                    </svg>
+                </span>
+
+                <span style="display:inline-flex;align-items:center;gap:6px;direction:ltr;white-space:nowrap;">
+                    <span style="display:inline-block;border:2px solid red;border-radius:999px;padding:2px 8px;">07504019519</span>
+                    <span>-</span>
+                    <span>07734019519</span>
+                </span>
+            </div>
+
+            <div style="text-align:right;direction:rtl;line-height:1.5;min-width:0;">Ù‡Û•ÙˆÙ„ÛŽØ± -Ù¦Ù  Ù…Û•ØªØ±ÛŽ Ø¨Û•Ø±Ø²Û• Ù¾Ø±Ø¯ÛŒ Ø¹Û•Ù†Ú©Ø§ÙˆÛ•</div>
+        </div>
+
+        <div style="padding:22px;display:flex;flex-direction:column;gap:14px;direction:rtl;text-align:right;position:relative;z-index:2;">
+            <label style="font-weight:bold;color:black;">Ø¨Û•Ú•ÛŽØ²:</label>
+            <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${escapeHTML(invoice.customerName)}</span>
+
+            <label style="font-weight:bold;color:black;">Ú˜Ù…Ø§Ø±Û•ÛŒ Ù…Û†Ø¨Ø§ÛŒÙ„:</label>
+            <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${escapeHTML(invoice.phone)}</span>
+
+            <label style="font-weight:bold;color:black;">Ù†Ø§ÙˆÙ†ÛŒØ´Ø§Ù†:</label>
+            <span style="display:block;min-height:32px;border-bottom:2px solid #c9d8ff;padding:4px;">${escapeHTML(invoice.address)}</span>
+        </div>
+
+        <div style="width:100%;overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;table-layout:fixed;position:relative;z-index:2;color:#111;">
+                <tr>
+                    <th style="width:90px;max-width:90px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">Ù†Ø±Ø®<br><small>${currencyLabel}</small></th>
+                    <th style="width:60px;max-width:60px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">Ù…Û•ØªØ±</th>
+                    <th style="width:260px;max-width:260px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">Ù†Ø§ÙˆÛ•Ú•Û†Ú© / Description</th>
+                    <th style="width:110px;max-width:110px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:10px 6px;border-bottom:2px solid #0d2f8f;font-size:14px;">Ø¨Ú•ÛŒ Ù¾Ø§Ø±Û•<br><small>${currencyLabel}</small></th>
+                    <th style="width:35px;min-width:35px;max-width:35px;background:linear-gradient(135deg,#1a4fd8,#2e6cff);color:white;padding:6px;border-bottom:2px solid #0d2f8f;font-size:14px;">#</th>
+                </tr>
+
+                ${items.map((item,index)=>`
+                    <tr>
+                        <td style="padding:8px 6px;text-align:center;border-bottom:1px solid #e6edff;vertical-align:top;color:#111;">${escapeHTML(item.price)}</td>
+                        <td style="padding:8px 6px;text-align:center;border-bottom:1px solid #e6edff;vertical-align:top;color:#111;">${escapeHTML(item.meter)}</td>
+                        <td style="padding:8px 6px;text-align:right;direction:rtl;line-height:1.7;border-bottom:1px solid #e6edff;vertical-align:top;color:#111;white-space:pre-wrap;word-break:break-word;">${escapeHTML(item.description)}</td>
+                        <td style="padding:8px 6px;text-align:center;border-bottom:1px solid #e6edff;vertical-align:top;color:#111;">${escapeHTML(item.amount)}</td>
+                        <td style="direction:rtl;text-align:right;font-weight:bold;width:35px;min-width:35px;max-width:35px;padding:6px;border-bottom:1px solid #e6edff;color:#111;">${index + 1}-</td>
+                    </tr>
+                `).join("")}
+            </table>
+        </div>
+
+        <div style="background:#f7f9ff;border-top:2px solid #c9d8ff;padding:22px;position:relative;z-index:2;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;font-weight:bold;">
+                <div>
+                    Ø¦ÛŒÙ…Ø²Ø§:
+                    <span style="display:inline-block;min-width:150px;border-bottom:2px solid #2e6cff;padding:4px;"></span>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;direction:rtl;">
+                    <div>
+                        Ú©Û†ÛŒ Ú¯Ø´ØªÛŒ:
+                        <span style="display:inline-block;min-width:150px;border-bottom:2px solid #2e6cff;padding:4px;">
+                            ${escapeHTML(invoice.total)}
+                        </span>
+                    </div>
+
+                    <div style="color:#1a4fd8;font-weight:bold;direction:rtl;text-align:right;max-width:420px;line-height:1.7;">${escapeHTML(kurdishTotal)}</div>
+                </div>
+            </div>
+
+            <div style="color:#d11a2a;font-weight:bold;text-align:center;margin-top:18px;font-size:16px;">
+                Ù‡Û•ÚµÛ• Ø¯Û•Ú¯Û•Ú•ÛŽØªÛ•ÙˆÛ• Ø¨Û† Ù‡Û•Ø±Ø¯ÙˆÙˆÙ„Ø§
+            </div>
+        </div>
+    </div>
+    `;
+}
+
+function viewInvoice(invoiceNumber){
+
+    const invoice = invoices.find(item => Number(item.number) === Number(invoiceNumber));
+
+    if(!invoice){
+        alert("Invoice not found");
+        return;
+    }
+
+    const win = window.open("", "_blank");
+
+    win.document.write(`
+        <html>
+        <head><title>Invoice ${invoice.number}</title></head>
+        <body style="margin:0;padding:20px;background:#f5f8ff;display:flex;justify-content:center;">
+            ${generateInvoiceHTMLV2(invoice)}
+        </body>
+        </html>
+    `);
+
+    win.document.close();
+}
+
+function editInvoice(invoiceNumber){
+    const invoice = invoices.find(item => Number(item.number) === Number(invoiceNumber));
+
+    if(!invoice){
+        alert("Invoice not found");
+        return;
+    }
+
+    localStorage.setItem("editInvoiceNumber", String(invoiceNumber));
+    localStorage.setItem("editInvoiceData", JSON.stringify(invoice));
+    window.location.href = "new_invoice.html";
+}
+
+async function downloadInvoicePDF(invoiceNumber){
+
+    const invoice = invoices.find(item => Number(item.number) === Number(invoiceNumber));
+
+    if(!invoice){
+        alert("Invoice not found");
+        return;
+    }
+
+    const container = document.createElement("div");
+
+    container.style.position = "fixed";
+    container.style.left = "-9999px";
+    container.style.top = "0";
+    container.style.width = "900px";
+
+    container.innerHTML = generateInvoiceHTMLV2(invoice);
+
+    document.body.appendChild(container);
+
+    const canvas = await html2canvas(container.querySelector("#invoiceDesign"),{
+        scale:2,
+        useCORS:true,
+        backgroundColor:"#ffffff"
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const { jsPDF } = window.jspdf;
+
+    const pdf = new jsPDF("p","mm","a4");
+
+    const pdfWidth = 210;
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData,"PNG",0,0,pdfWidth,pdfHeight);
+
+    pdf.save("carpet-invoice-" + invoice.number + ".pdf");
+
+    document.body.removeChild(container);
+}
+
+async function deleteInvoice(invoiceNumber){
+
+    const confirmDelete = confirm("Delete invoice No: " + invoiceNumber + " ?");
+
+    if(!confirmDelete) return;
+
+    invoices = invoices.filter(invoice => Number(invoice.number) !== Number(invoiceNumber));
+
+    await SivarFirebase.saveInvoices(invoices);
+
+    renderInvoices(invoices);
+}
+
+searchInput.addEventListener("input",function(){
+
+    const value = this.value.toLowerCase();
+
+    const filtered = invoices.filter(invoice =>
+        String(invoice.number).includes(value) ||
+        (invoice.customerName || "").toLowerCase().includes(value) ||
+        (invoice.phone || "").toLowerCase().includes(value)
+    );
+
+    renderInvoices(filtered);
+});
+
+renderInvoices(invoices);
+
+</script>
+
+</body>
+</html>
+
+

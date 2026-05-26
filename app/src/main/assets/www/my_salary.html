@@ -1,0 +1,331 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>My Salary</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+    font-family:'Segoe UI',sans-serif;
+    min-height:100vh;
+    background:radial-gradient(circle at top left,#4f46e5,#111827 55%),linear-gradient(135deg,#0f172a,#1e293b);
+    color:#fff;
+    padding:30px;
+}
+
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:26px;
+}
+
+.page-title{
+    font-size:38px;
+    font-weight:800;
+}
+
+.back-btn,
+.filter-btn{
+    height:52px;
+    border:none;
+    border-radius:16px;
+    padding:0 24px;
+    color:#fff;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+    background:linear-gradient(135deg,#6366f1,#06b6d4);
+    box-shadow:0 10px 25px rgba(99,102,241,0.28);
+}
+
+.page-note{
+    color:rgba(255,255,255,0.72);
+    margin-bottom:24px;
+    line-height:1.6;
+}
+
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:18px;
+    margin-bottom:28px;
+}
+
+.summary-card,
+.custom-box{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.13);
+    border-radius:24px;
+    padding:22px;
+    box-shadow:0 16px 40px rgba(0,0,0,0.22);
+}
+
+.summary-label{
+    color:rgba(255,255,255,0.66);
+    font-size:14px;
+    margin-bottom:12px;
+}
+
+.invoice-count{
+    font-size:34px;
+    font-weight:900;
+    margin-bottom:14px;
+}
+
+.money-line{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 0;
+    border-top:1px solid rgba(255,255,255,0.1);
+}
+
+.money-line span:first-child{
+    color:rgba(255,255,255,0.68);
+}
+
+.money-line span:last-child{
+    font-weight:800;
+}
+
+.custom-box{
+    margin-bottom:26px;
+}
+
+.custom-title{
+    font-size:23px;
+    font-weight:800;
+    margin-bottom:16px;
+}
+
+.date-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:14px;
+    align-items:end;
+}
+
+.field label{
+    display:block;
+    color:rgba(255,255,255,0.68);
+    font-size:13px;
+    margin-bottom:8px;
+    font-weight:700;
+}
+
+.field input{
+    width:100%;
+    height:52px;
+    border:none;
+    outline:none;
+    border-radius:16px;
+    padding:0 14px;
+    color:#fff;
+    font-size:15px;
+    background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.15);
+}
+
+.custom-result{
+    margin-top:18px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:14px;
+}
+
+.result-card{
+    background:rgba(255,255,255,0.06);
+    border-radius:18px;
+    padding:18px;
+}
+
+.empty-box{
+    text-align:center;
+    padding:48px 20px;
+    color:rgba(255,255,255,0.72);
+    font-size:18px;
+}
+
+@media(max-width:520px){
+    body{padding:20px;}
+    .page-title{font-size:31px;}
+    .top-bar{align-items:flex-start;}
+    .back-btn,.filter-btn{width:100%;}
+}
+</style>
+
+<script src="./firebase-data.js?v=works1"></script>
+</head>
+
+<body>
+
+<div class="top-bar">
+    <h1 class="page-title">My Salary</h1>
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">Back To Dashboard</button>
+</div>
+
+<p class="page-note">
+    This page counts only the money saved in My Works.
+</p>
+
+<div class="summary-grid" id="summaryGrid"></div>
+
+<div class="custom-box">
+    <div class="custom-title">Select Date Range</div>
+
+    <div class="date-row">
+        <div class="field">
+            <label for="fromDate">From Date</label>
+            <input type="date" id="fromDate">
+        </div>
+
+        <div class="field">
+            <label for="toDate">To Date</label>
+            <input type="date" id="toDate">
+        </div>
+
+        <button class="filter-btn" onclick="calculateCustomRange()">Calculate</button>
+    </div>
+
+    <div class="custom-result" id="customResult"></div>
+</div>
+
+<script>
+const summaryGrid = document.getElementById("summaryGrid");
+const customResult = document.getElementById("customResult");
+let works = [];
+
+function parseMoney(value){
+    return parseFloat(String(value || "").replace(/[^\d.]/g, "")) || 0;
+}
+
+function parseInputDate(value){
+    const parts = String(value || "").split("-").map(Number);
+
+    if(parts.length !== 3 || parts.some(part => !part)){
+        return null;
+    }
+
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+function startOfDay(date){
+    const result = new Date(date);
+    result.setHours(0, 0, 0, 0);
+    return result;
+}
+
+function endOfDay(date){
+    const result = new Date(date);
+    result.setHours(23, 59, 59, 999);
+    return result;
+}
+
+function startOfWeek(date){
+    const result = startOfDay(date);
+    const day = result.getDay();
+    result.setDate(result.getDate() - day);
+    return result;
+}
+
+function startOfMonth(date){
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function startOfYear(date){
+    return new Date(date.getFullYear(), 0, 1);
+}
+
+function formatNumber(value, currency){
+    if(!value){
+        return "0";
+    }
+
+    return value.toLocaleString();
+}
+
+function getRangeTotal(fromDate, toDate){
+    let total = 0;
+
+    works.forEach(work => {
+        const workDate = parseInputDate(work.date);
+
+        if(!workDate || workDate < fromDate || workDate > toDate){
+            return;
+        }
+
+        const rows = Array.isArray(work.rows) ? work.rows : [];
+
+        rows.forEach(row => {
+            total += parseMoney(row.cost);
+        });
+    });
+
+    return total;
+}
+
+function renderStats(container, title, total){
+    container.innerHTML += `
+        <div class="summary-card">
+            <div class="summary-label">${title}</div>
+            <div class="invoice-count">${formatNumber(total)}</div>
+        </div>
+    `;
+}
+
+function renderSummary(){
+    const now = new Date();
+    const todayStart = startOfDay(now);
+    const todayEnd = endOfDay(now);
+
+    summaryGrid.innerHTML = "";
+
+    renderStats(summaryGrid, "Today", getRangeTotal(todayStart, todayEnd));
+    renderStats(summaryGrid, "This Week", getRangeTotal(startOfWeek(now), todayEnd));
+    renderStats(summaryGrid, "This Month", getRangeTotal(startOfMonth(now), todayEnd));
+    renderStats(summaryGrid, "This Year", getRangeTotal(startOfYear(now), todayEnd));
+
+    if(works.length === 0){
+        summaryGrid.innerHTML = `<div class="empty-box">No works saved yet</div>`;
+    }
+}
+
+function calculateCustomRange(){
+    const fromValue = document.getElementById("fromDate").value;
+    const toValue = document.getElementById("toDate").value;
+
+    if(!fromValue || !toValue){
+        alert("Please select both dates");
+        return;
+    }
+
+    const fromDate = startOfDay(parseInputDate(fromValue));
+    const toDate = endOfDay(parseInputDate(toValue));
+
+    if(fromDate > toDate){
+        alert("From date must be before To date");
+        return;
+    }
+
+    customResult.innerHTML = "";
+    renderStats(customResult, "Selected Range", getRangeTotal(fromDate, toDate));
+}
+
+async function loadSalary(){
+    works = await SivarFirebase.getWorks();
+    renderSummary();
+}
+
+loadSalary();
+</script>
+
+</body>
+</html>
+
