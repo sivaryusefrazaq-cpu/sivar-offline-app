@@ -24,6 +24,8 @@ import java.io.OutputStream;
 
 public class MainActivity extends Activity {
     private WebView webView;
+    private String pendingPdfFileName;
+    private StringBuilder pendingPdfBase64;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,10 +85,40 @@ public class MainActivity extends Activity {
 
     public class PdfBridge {
         @JavascriptInterface
+        public void startPdfSave(String fileName) {
+            pendingPdfFileName = fileName;
+            pendingPdfBase64 = new StringBuilder();
+        }
+
+        @JavascriptInterface
+        public void appendPdfChunk(String chunk) {
+            if(pendingPdfBase64 == null) {
+                pendingPdfBase64 = new StringBuilder();
+            }
+
+            pendingPdfBase64.append(chunk);
+        }
+
+        @JavascriptInterface
+        public void finishPdfSave() {
+            String fileName = pendingPdfFileName == null ? "sivar-invoice.pdf" : pendingPdfFileName;
+            String base64Data = pendingPdfBase64 == null ? "" : pendingPdfBase64.toString();
+
+            pendingPdfFileName = null;
+            pendingPdfBase64 = null;
+
+            savePdfBytes(fileName, base64Data);
+        }
+
+        @JavascriptInterface
         public void saveBase64(String dataUrl, String fileName) {
+            String base64Data = dataUrl.substring(dataUrl.indexOf(",") + 1);
+            savePdfBytes(fileName, base64Data);
+        }
+
+        private void savePdfBytes(String fileName, String base64Data) {
             runOnUiThread(() -> {
                 try {
-                    String base64Data = dataUrl.substring(dataUrl.indexOf(",") + 1);
                     byte[] pdfBytes = Base64.decode(base64Data, Base64.DEFAULT);
 
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

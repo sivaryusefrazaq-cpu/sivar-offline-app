@@ -706,7 +706,18 @@ async function downloadInvoicePDF(invoiceNumber){
 
     const fileName = "carpet-invoice-" + invoice.number + ".pdf";
 
-    if(window.AndroidPdf && window.AndroidPdf.saveBase64){
+    if(window.AndroidPdf && window.AndroidPdf.startPdfSave){
+        const base64Pdf = pdf.output("datauristring").split(",")[1];
+        const chunkSize = 60000;
+
+        window.AndroidPdf.startPdfSave(fileName);
+
+        for(let index = 0; index < base64Pdf.length; index += chunkSize){
+            window.AndroidPdf.appendPdfChunk(base64Pdf.slice(index, index + chunkSize));
+        }
+
+        window.AndroidPdf.finishPdfSave();
+    }else if(window.AndroidPdf && window.AndroidPdf.saveBase64){
         window.AndroidPdf.saveBase64(pdf.output("datauristring"), fileName);
     }else{
         pdf.save(fileName);
