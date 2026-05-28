@@ -138,10 +138,10 @@ public class MainActivity extends Activity {
 
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         ContentValues values = new ContentValues();
-                        values.put(MediaStore.Downloads.DISPLAY_NAME, safeFileName);
-                        values.put(MediaStore.Downloads.MIME_TYPE, "application/pdf");
-                        values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/" + PDF_FOLDER_NAME);
-                        values.put(MediaStore.Downloads.IS_PENDING, 1);
+                        values.put(MediaStore.MediaColumns.DISPLAY_NAME, safeFileName);
+                        values.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
+                        values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/" + PDF_FOLDER_NAME);
+                        values.put(MediaStore.MediaColumns.IS_PENDING, 1);
 
                         Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
 
@@ -158,7 +158,7 @@ public class MainActivity extends Activity {
                         }
 
                         ContentValues finishedValues = new ContentValues();
-                        finishedValues.put(MediaStore.Downloads.IS_PENDING, 0);
+                        finishedValues.put(MediaStore.MediaColumns.IS_PENDING, 0);
                         getContentResolver().update(uri, finishedValues, null, null);
                     } else {
                         File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), PDF_FOLDER_NAME);

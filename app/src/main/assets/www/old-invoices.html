@@ -690,6 +690,25 @@ function savePdfToPhone(pdf, fileName){
     pdf.save(fileName);
 }
 
+function waitForImages(container){
+    const images = Array.from(container.querySelectorAll("img"));
+
+    if(images.length === 0){
+        return Promise.resolve();
+    }
+
+    return Promise.all(images.map(function(img){
+        return new Promise(function(resolve, reject){
+            if(img.complete && img.naturalWidth > 0){
+                resolve();
+            }else{
+                img.onload = resolve;
+                img.onerror = reject;
+            }
+        });
+    }));
+}
+
 async function downloadInvoicePDF(invoiceNumber){
 
     const invoice = invoices.find(item => Number(item.number) === Number(invoiceNumber));
@@ -702,38 +721,67 @@ async function downloadInvoicePDF(invoiceNumber){
     const container = document.createElement("div");
 
     try{
-        container.style.position = "fixed";
-        container.style.left = "-9999px";
+        container.style.position = "absolute";
+        container.style.left = "0";
         container.style.top = "0";
         container.style.width = "900px";
+        container.style.zIndex = "-1";
+        container.style.pointerEvents = "none";
 
         container.innerHTML = generateInvoiceHTMLV2(invoice);
 
         document.body.appendChild(container);
 
-        const canvas = await html2canvas(container.querySelector("#invoiceDesign"),{
+        if(document.fonts && document.fonts.ready){
+            await document.fonts.ready;
+        }
+
+        await waitForImages(container);
+
+        const invoiceDesign = container.querySelector("#invoiceDesign");
+        const canvas = await html2canvas(invoiceDesign,{
             scale:2,
             useCORS:true,
-            backgroundColor:"#ffffff"
+            allowTaint:true,
+            backgroundColor:"#ffffff",
+            scrollX:0,
+            scrollY:0,
+            windowWidth:900,
+            windowHeight:invoiceDesign.scrollHeight || 1273,
+            imageTimeout:15000
         });
 
-        const imgData = canvas.toDataURL("image/png");
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
         const { jsPDF } = window.jspdf;
 
         const pdf = new jsPDF("p","mm","a4");
 
-        const pdfWidth = 210;
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const margin = 6;
+        const usableWidth = pageWidth - margin * 2;
+        const usableHeight = pageHeight - margin * 2;
 
-        pdf.addImage(imgData,"PNG",0,0,pdfWidth,pdfHeight);
+        let imgWidth = usableWidth;
+        let imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        if(imgHeight > usableHeight){
+            imgHeight = usableHeight;
+            imgWidth = (canvas.width * imgHeight) / canvas.height;
+        }
+
+        const x = (pageWidth - imgWidth) / 2;
+        const y = (pageHeight - imgHeight) / 2;
+
+        pdf.addImage(imgData,"JPEG",x,y,imgWidth,imgHeight);
 
         const fileName = "carpet-invoice-" + invoice.number + ".pdf";
 
         savePdfToPhone(pdf, fileName);
     }catch(error){
         console.error(error);
-        alert("PDF save error");
+        alert("PDF save error: " + (error && error.message ? error.message : error));
     }finally{
         if(container.parentNode){
             document.body.removeChild(container);
