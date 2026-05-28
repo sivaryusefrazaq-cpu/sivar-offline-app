@@ -216,11 +216,20 @@ body::after{
         Note
     </button>
 
-    <button class="logout-btn" onclick="window.location.href='login.html'">
+    <button class="logout-btn" onclick="logout()">
         Logout
     </button>
 
 </div>
+
+<script>
+function logout(){
+    sessionStorage.clear();
+    localStorage.removeItem("editInvoiceNumber");
+    localStorage.removeItem("editInvoiceData");
+    window.location.replace("index.html");
+}
+</script>
 
 </body>
 </html>
