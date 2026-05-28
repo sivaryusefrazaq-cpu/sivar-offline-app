@@ -16,6 +16,7 @@ import android.util.Log;
 import android.widget.Toast;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
+import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -32,6 +33,7 @@ public class MainActivity extends Activity {
     private String pendingPdfFileName;
     private StringBuilder pendingPdfBase64;
     private static final int STORAGE_PERMISSION_REQUEST = 101;
+    private static final int LOCATION_PERMISSION_REQUEST = 102;
     private static final String PDF_FOLDER_NAME = "Sivar Invoices";
     private static final String TAG = "SivarPdfSave";
 
@@ -48,11 +50,13 @@ public class MainActivity extends Activity {
         settings.setDatabaseEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
+        settings.setGeolocationEnabled(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
 
         webView.addJavascriptInterface(new PdfBridge(), "AndroidPdf");
         webView.addJavascriptInterface(new AssetBridge(), "AndroidAssets");
         requestStoragePermissionIfNeeded();
+        requestLocationPermissionIfNeeded();
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -87,6 +91,14 @@ public class MainActivity extends Activity {
                     .setOnCancelListener(dialog -> result.cancel())
                     .show();
                 return true;
+            }
+
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                boolean hasLocationPermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                    checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                    checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+                callback.invoke(origin, hasLocationPermission, false);
             }
         });
 
@@ -132,6 +144,19 @@ public class MainActivity extends Activity {
         if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
             checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
+        }
+    }
+
+    private void requestLocationPermissionIfNeeded() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                },
+                LOCATION_PERMISSION_REQUEST
+            );
         }
     }
 

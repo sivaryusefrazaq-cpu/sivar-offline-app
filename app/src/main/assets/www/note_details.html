@@ -596,21 +596,78 @@ function getCurrentLocation(){
     }
 
     return new Promise(resolve => {
-        navigator.geolocation.getCurrentPosition(
+        let bestPosition = null;
+        let resolved = false;
+        let watchId = null;
+
+        function locationData(position){
+            return {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracy: position.coords.accuracy,
+                savedAt: getSavedStamp()
+            };
+        }
+
+        function isBetterPosition(position){
+            if(!bestPosition){
+                return true;
+            }
+
+            return Number(position.coords.accuracy || Infinity) < Number(bestPosition.coords.accuracy || Infinity);
+        }
+
+        function finish(){
+            if(resolved){
+                return;
+            }
+
+            resolved = true;
+
+            if(watchId !== null){
+                navigator.geolocation.clearWatch(watchId);
+            }
+
+            resolve(bestPosition ? locationData(bestPosition) : null);
+        }
+
+        watchId = navigator.geolocation.watchPosition(
             position => {
-                resolve({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    savedAt: getSavedStamp()
-                });
+                if(isBetterPosition(position)){
+                    bestPosition = position;
+                }
+
+                if(position.coords.accuracy && position.coords.accuracy <= 15){
+                    finish();
+                }
             },
-            () => resolve(null),
+            () => finish(),
             {
                 enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 60000
+                timeout: 20000,
+                maximumAge: 0
             }
         );
+
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                if(isBetterPosition(position)){
+                    bestPosition = position;
+                }
+
+                if(position.coords.accuracy && position.coords.accuracy <= 15){
+                    finish();
+                }
+            },
+            () => {},
+            {
+                enableHighAccuracy: true,
+                timeout: 20000,
+                maximumAge: 0
+            }
+        );
+
+        setTimeout(finish, 22000);
     });
 }
 
@@ -838,6 +895,7 @@ async function saveName(){
             savedDateText: savedDateText,
             latitude: location ? location.latitude : null,
             longitude: location ? location.longitude : null,
+            locationAccuracy: location ? location.accuracy : null,
             locationSavedAt: location ? location.savedAt : null
         });
     }else{
