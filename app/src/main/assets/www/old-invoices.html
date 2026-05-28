@@ -470,9 +470,14 @@ function getCurrencyLabel(invoice){
     return invoice.currency === "USD" ? "دۆلار" : "دینار";
 }
 
+function normalizeKurdishTotalText(text, total){
+    const value = String(text || "").trim() || numberToKurdish(total || 0);
+    return value.replace(/^یەک سەد/, "سەد");
+}
+
 function generateInvoiceHTMLV2(invoice){
     const currencyLabel = getCurrencyLabel(invoice);
-    const kurdishTotal = invoice.totalText || numberToKurdish(invoice.total || 0);
+    const kurdishTotal = normalizeKurdishTotalText(invoice.totalText, invoice.total);
     const items = invoice.items && invoice.items.length
         ? invoice.items
         : [{ price:"", meter:"", description:"", amount:"" }];
@@ -831,7 +836,7 @@ async function downloadInvoicePDF(invoiceNumber){
         }
 
         const x = (pageWidth - imgWidth) / 2;
-        const y = (pageHeight - imgHeight) / 2;
+        const y = margin;
 
         pdf.addImage(imgData,"JPEG",x,y,imgWidth,imgHeight);
 

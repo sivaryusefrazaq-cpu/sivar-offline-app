@@ -54,6 +54,7 @@ body{
     background:linear-gradient(135deg,#1a4fd8,#0d2f8f);
     color:white;
     padding:20px;
+    min-height:130px;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -79,7 +80,7 @@ body{
 }
 
 .center-logo img{
-    height:75px;
+    height:105px;
     object-fit:contain;
 }
 
@@ -849,7 +850,7 @@ async function downloadPDF(){
         }
 
         const x = (pageWidth - imgWidth) / 2;
-        const y = (pageHeight - imgHeight) / 2;
+        const y = margin;
 
         pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
 
