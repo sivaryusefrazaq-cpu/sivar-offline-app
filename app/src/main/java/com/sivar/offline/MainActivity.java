@@ -104,7 +104,7 @@ public class MainActivity extends Activity {
                     safeFileName = safeFileName.substring(slashIndex + 1);
                 }
 
-                if(!"barcode.jpg".equals(safeFileName) && !"logo.jpg".equals(safeFileName)) {
+                if(!"barcode.jpg".equals(safeFileName) && !"logo.jpg".equals(safeFileName) && !"logo.png".equals(safeFileName)) {
                     return "";
                 }
 
@@ -118,7 +118,8 @@ public class MainActivity extends Activity {
                     }
 
                     String base64Data = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP);
-                    return "data:image/jpeg;base64," + base64Data;
+                    String mimeType = safeFileName.endsWith(".png") ? "image/png" : "image/jpeg";
+                    return "data:" + mimeType + ";base64," + base64Data;
                 }
             } catch(Exception error) {
                 Log.e(TAG, "Could not read asset image", error);
