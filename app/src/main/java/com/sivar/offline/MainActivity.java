@@ -1,9 +1,11 @@
 package com.sivar.offline;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +28,8 @@ public class MainActivity extends Activity {
     private WebView webView;
     private String pendingPdfFileName;
     private StringBuilder pendingPdfBase64;
+    private static final int STORAGE_PERMISSION_REQUEST = 101;
+    private static final String PDF_FOLDER_NAME = "Sivar Invoices";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +47,7 @@ public class MainActivity extends Activity {
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
 
         webView.addJavascriptInterface(new PdfBridge(), "AndroidPdf");
+        requestStoragePermissionIfNeeded();
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -83,6 +88,13 @@ public class MainActivity extends Activity {
         webView.loadUrl("file:///android_asset/www/index.html");
     }
 
+    private void requestStoragePermissionIfNeeded() {
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
+            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_REQUEST);
+        }
+    }
+
     public class PdfBridge {
         @JavascriptInterface
         public void startPdfSave(String fileName) {
@@ -120,14 +132,16 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> {
                 try {
                     byte[] pdfBytes = Base64.decode(base64Data, Base64.DEFAULT);
+                    String safeFileName = sanitizePdfFileName(fileName);
 
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         ContentValues values = new ContentValues();
-                        values.put(MediaStore.Downloads.DISPLAY_NAME, fileName);
-                        values.put(MediaStore.Downloads.MIME_TYPE, "application/pdf");
-                        values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+                        values.put(MediaStore.Files.FileColumns.DISPLAY_NAME, safeFileName);
+                        values.put(MediaStore.Files.FileColumns.MIME_TYPE, "application/pdf");
+                        values.put(MediaStore.Files.FileColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/" + PDF_FOLDER_NAME);
+                        values.put(MediaStore.Files.FileColumns.IS_PENDING, 1);
 
-                        Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                        Uri uri = getContentResolver().insert(MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values);
 
                         if(uri == null) {
                             throw new IllegalStateException("Could not create PDF file");
@@ -140,25 +154,48 @@ public class MainActivity extends Activity {
 
                             outputStream.write(pdfBytes);
                         }
-                    } else {
-                        File directory = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 
-                        if(directory == null) {
-                            throw new IllegalStateException("Downloads folder is unavailable");
+                        ContentValues finishedValues = new ContentValues();
+                        finishedValues.put(MediaStore.Files.FileColumns.IS_PENDING, 0);
+                        getContentResolver().update(uri, finishedValues, null, null);
+                    } else {
+                        File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), PDF_FOLDER_NAME);
+
+                        if(!directory.exists() && !directory.mkdirs()) {
+                            throw new IllegalStateException("Documents folder is unavailable");
                         }
 
-                        File file = new File(directory, fileName);
+                        File file = new File(directory, safeFileName);
 
                         try(FileOutputStream outputStream = new FileOutputStream(file)) {
                             outputStream.write(pdfBytes);
                         }
+
+                        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                        scanIntent.setData(Uri.fromFile(file));
+                        sendBroadcast(scanIntent);
                     }
 
-                    Toast.makeText(MainActivity.this, "PDF saved to Downloads", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "PDF saved to Documents/" + PDF_FOLDER_NAME, Toast.LENGTH_LONG).show();
                 } catch(Exception error) {
                     Toast.makeText(MainActivity.this, "PDF save failed", Toast.LENGTH_LONG).show();
                 }
             });
+        }
+
+        private String sanitizePdfFileName(String fileName) {
+            String cleanName = fileName == null ? "sivar-invoice.pdf" : fileName.trim();
+            cleanName = cleanName.replaceAll("[\\\\/:*?\"<>|]", "-");
+
+            if(cleanName.length() == 0) {
+                cleanName = "sivar-invoice.pdf";
+            }
+
+            if(!cleanName.toLowerCase().endsWith(".pdf")) {
+                cleanName += ".pdf";
+            }
+
+            return cleanName;
         }
     }
 

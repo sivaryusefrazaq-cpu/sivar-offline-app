@@ -703,6 +703,29 @@ function setInvoiceDateEditable(isEditable){
     invoiceDate.title = isEditable ? "Edit invoice date" : "";
 }
 
+function savePdfToPhone(pdf, fileName){
+    if(window.AndroidPdf && window.AndroidPdf.startPdfSave){
+        const base64Pdf = pdf.output("datauristring").split(",")[1];
+        const chunkSize = 60000;
+
+        window.AndroidPdf.startPdfSave(fileName);
+
+        for(let index = 0; index < base64Pdf.length; index += chunkSize){
+            window.AndroidPdf.appendPdfChunk(base64Pdf.slice(index, index + chunkSize));
+        }
+
+        window.AndroidPdf.finishPdfSave();
+        return;
+    }
+
+    if(window.AndroidPdf && window.AndroidPdf.saveBase64){
+        window.AndroidPdf.saveBase64(pdf.output("datauristring"), fileName);
+        return;
+    }
+
+    pdf.save(fileName);
+}
+
 async function downloadPDF(){
     const buttons = document.querySelector(".buttons");
 
@@ -753,22 +776,11 @@ async function downloadPDF(){
         pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
 
         const fileName = "carpet-invoice-" + invoiceNumber + ".pdf";
-        const pdfBlob = pdf.output("blob");
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-
-        const link = document.createElement("a");
-        link.href = pdfUrl;
-        link.download = fileName;
-        link.style.display = "none";
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        savePdfToPhone(pdf, fileName);
 
         await saveInvoiceToOldInvoices();
 
         setTimeout(function(){
-            URL.revokeObjectURL(pdfUrl);
             window.location.reload();
         }, 1000);
 

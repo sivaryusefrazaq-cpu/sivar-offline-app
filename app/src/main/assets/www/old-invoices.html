@@ -240,7 +240,7 @@ function renderInvoices(data){
             <div class="button-row">
                 <button class="action-btn view-btn" onclick="viewInvoice(${invoice.number})">View Invoice</button>
                 <button class="action-btn edit-btn" onclick="editInvoice(${invoice.number})">Edit</button>
-                <button class="action-btn download-btn" onclick="downloadInvoicePDF(${invoice.number})">Download PDF</button>
+                <button class="action-btn download-btn" onclick="downloadInvoicePDF(${invoice.number})">Save PDF</button>
                 <button class="action-btn delete-btn" onclick="deleteInvoice(${invoice.number})">Delete</button>
             </div>
         `;
@@ -667,6 +667,29 @@ function editInvoice(invoiceNumber){
     window.location.href = "new_invoice.html";
 }
 
+function savePdfToPhone(pdf, fileName){
+    if(window.AndroidPdf && window.AndroidPdf.startPdfSave){
+        const base64Pdf = pdf.output("datauristring").split(",")[1];
+        const chunkSize = 60000;
+
+        window.AndroidPdf.startPdfSave(fileName);
+
+        for(let index = 0; index < base64Pdf.length; index += chunkSize){
+            window.AndroidPdf.appendPdfChunk(base64Pdf.slice(index, index + chunkSize));
+        }
+
+        window.AndroidPdf.finishPdfSave();
+        return;
+    }
+
+    if(window.AndroidPdf && window.AndroidPdf.saveBase64){
+        window.AndroidPdf.saveBase64(pdf.output("datauristring"), fileName);
+        return;
+    }
+
+    pdf.save(fileName);
+}
+
 async function downloadInvoicePDF(invoiceNumber){
 
     const invoice = invoices.find(item => Number(item.number) === Number(invoiceNumber));
@@ -706,22 +729,7 @@ async function downloadInvoicePDF(invoiceNumber){
 
     const fileName = "carpet-invoice-" + invoice.number + ".pdf";
 
-    if(window.AndroidPdf && window.AndroidPdf.startPdfSave){
-        const base64Pdf = pdf.output("datauristring").split(",")[1];
-        const chunkSize = 60000;
-
-        window.AndroidPdf.startPdfSave(fileName);
-
-        for(let index = 0; index < base64Pdf.length; index += chunkSize){
-            window.AndroidPdf.appendPdfChunk(base64Pdf.slice(index, index + chunkSize));
-        }
-
-        window.AndroidPdf.finishPdfSave();
-    }else if(window.AndroidPdf && window.AndroidPdf.saveBase64){
-        window.AndroidPdf.saveBase64(pdf.output("datauristring"), fileName);
-    }else{
-        pdf.save(fileName);
-    }
+    savePdfToPhone(pdf, fileName);
 
     document.body.removeChild(container);
 }
