@@ -704,6 +704,75 @@ function setInvoiceDateEditable(isEditable){
     invoiceDate.title = isEditable ? "Edit invoice date" : "";
 }
 
+function waitForImages(container){
+    const images = Array.from(container.querySelectorAll("img"));
+
+    if(images.length === 0){
+        return Promise.resolve();
+    }
+
+    return Promise.all(images.map(function(img){
+        return new Promise(function(resolve, reject){
+            if(img.complete && img.naturalWidth > 0){
+                resolve();
+            }else{
+                img.onload = resolve;
+                img.onerror = reject;
+            }
+        });
+    }));
+}
+
+function readBlobAsDataURL(blob){
+    return new Promise(function(resolve, reject){
+        const reader = new FileReader();
+        reader.onload = function(){
+            resolve(reader.result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+function loadImageAsDataURL(src){
+    return new Promise(function(resolve, reject){
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", src, true);
+        xhr.responseType = "blob";
+        xhr.onload = async function(){
+            if(xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300)){
+                try{
+                    resolve(await readBlobAsDataURL(xhr.response));
+                }catch(error){
+                    reject(error);
+                }
+            }else{
+                reject(new Error("Could not load image: " + src));
+            }
+        };
+        xhr.onerror = function(){
+            reject(new Error("Could not load image: " + src));
+        };
+        xhr.send();
+    });
+}
+
+async function inlineImagesForCanvas(container){
+    const images = Array.from(container.querySelectorAll("img"));
+
+    await Promise.all(images.map(async function(img){
+        const src = img.getAttribute("src");
+
+        if(!src || src.indexOf("data:") === 0){
+            return;
+        }
+
+        img.src = await loadImageAsDataURL(img.src);
+    }));
+
+    await waitForImages(container);
+}
+
 function savePdfToPhone(pdf, fileName){
     if(window.AndroidPdf && window.AndroidPdf.startPdfSave){
         const base64Pdf = pdf.output("datauristring").split(",")[1];
@@ -739,11 +808,13 @@ async function downloadPDF(){
         buttons.style.display = "none";
         document.body.classList.add("pdf-export");
 
+        await inlineImagesForCanvas(element);
         await new Promise(resolve => setTimeout(resolve, 400));
 
         const canvas = await html2canvas(element,{
             scale: 2,
             useCORS: true,
+            allowTaint: false,
             backgroundColor: "#ffffff",
             scrollX: 0,
             scrollY: 0,

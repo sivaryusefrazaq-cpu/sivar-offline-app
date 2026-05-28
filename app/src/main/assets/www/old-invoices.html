@@ -709,6 +709,56 @@ function waitForImages(container){
     }));
 }
 
+function readBlobAsDataURL(blob){
+    return new Promise(function(resolve, reject){
+        const reader = new FileReader();
+        reader.onload = function(){
+            resolve(reader.result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+function loadImageAsDataURL(src){
+    return new Promise(function(resolve, reject){
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", src, true);
+        xhr.responseType = "blob";
+        xhr.onload = async function(){
+            if(xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300)){
+                try{
+                    resolve(await readBlobAsDataURL(xhr.response));
+                }catch(error){
+                    reject(error);
+                }
+            }else{
+                reject(new Error("Could not load image: " + src));
+            }
+        };
+        xhr.onerror = function(){
+            reject(new Error("Could not load image: " + src));
+        };
+        xhr.send();
+    });
+}
+
+async function inlineImagesForCanvas(container){
+    const images = Array.from(container.querySelectorAll("img"));
+
+    await Promise.all(images.map(async function(img){
+        const src = img.getAttribute("src");
+
+        if(!src || src.indexOf("data:") === 0){
+            return;
+        }
+
+        img.src = await loadImageAsDataURL(img.src);
+    }));
+
+    await waitForImages(container);
+}
+
 async function downloadInvoicePDF(invoiceNumber){
 
     const invoice = invoices.find(item => Number(item.number) === Number(invoiceNumber));
@@ -736,13 +786,13 @@ async function downloadInvoicePDF(invoiceNumber){
             await document.fonts.ready;
         }
 
-        await waitForImages(container);
+        await inlineImagesForCanvas(container);
 
         const invoiceDesign = container.querySelector("#invoiceDesign");
         const canvas = await html2canvas(invoiceDesign,{
             scale:2,
             useCORS:true,
-            allowTaint:true,
+            allowTaint:false,
             backgroundColor:"#ffffff",
             scrollX:0,
             scrollY:0,
