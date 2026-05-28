@@ -701,37 +701,44 @@ async function downloadInvoicePDF(invoiceNumber){
 
     const container = document.createElement("div");
 
-    container.style.position = "fixed";
-    container.style.left = "-9999px";
-    container.style.top = "0";
-    container.style.width = "900px";
+    try{
+        container.style.position = "fixed";
+        container.style.left = "-9999px";
+        container.style.top = "0";
+        container.style.width = "900px";
 
-    container.innerHTML = generateInvoiceHTMLV2(invoice);
+        container.innerHTML = generateInvoiceHTMLV2(invoice);
 
-    document.body.appendChild(container);
+        document.body.appendChild(container);
 
-    const canvas = await html2canvas(container.querySelector("#invoiceDesign"),{
-        scale:2,
-        useCORS:true,
-        backgroundColor:"#ffffff"
-    });
+        const canvas = await html2canvas(container.querySelector("#invoiceDesign"),{
+            scale:2,
+            useCORS:true,
+            backgroundColor:"#ffffff"
+        });
 
-    const imgData = canvas.toDataURL("image/png");
+        const imgData = canvas.toDataURL("image/png");
 
-    const { jsPDF } = window.jspdf;
+        const { jsPDF } = window.jspdf;
 
-    const pdf = new jsPDF("p","mm","a4");
+        const pdf = new jsPDF("p","mm","a4");
 
-    const pdfWidth = 210;
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        const pdfWidth = 210;
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-    pdf.addImage(imgData,"PNG",0,0,pdfWidth,pdfHeight);
+        pdf.addImage(imgData,"PNG",0,0,pdfWidth,pdfHeight);
 
-    const fileName = "carpet-invoice-" + invoice.number + ".pdf";
+        const fileName = "carpet-invoice-" + invoice.number + ".pdf";
 
-    savePdfToPhone(pdf, fileName);
-
-    document.body.removeChild(container);
+        savePdfToPhone(pdf, fileName);
+    }catch(error){
+        console.error(error);
+        alert("PDF save error");
+    }finally{
+        if(container.parentNode){
+            document.body.removeChild(container);
+        }
+    }
 }
 
 async function deleteInvoice(invoiceNumber){

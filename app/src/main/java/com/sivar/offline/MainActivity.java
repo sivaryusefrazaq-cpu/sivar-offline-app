@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.widget.Toast;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
@@ -30,6 +31,7 @@ public class MainActivity extends Activity {
     private StringBuilder pendingPdfBase64;
     private static final int STORAGE_PERMISSION_REQUEST = 101;
     private static final String PDF_FOLDER_NAME = "Sivar Invoices";
+    private static final String TAG = "SivarPdfSave";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,12 +138,12 @@ public class MainActivity extends Activity {
 
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         ContentValues values = new ContentValues();
-                        values.put(MediaStore.Files.FileColumns.DISPLAY_NAME, safeFileName);
-                        values.put(MediaStore.Files.FileColumns.MIME_TYPE, "application/pdf");
-                        values.put(MediaStore.Files.FileColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/" + PDF_FOLDER_NAME);
-                        values.put(MediaStore.Files.FileColumns.IS_PENDING, 1);
+                        values.put(MediaStore.Downloads.DISPLAY_NAME, safeFileName);
+                        values.put(MediaStore.Downloads.MIME_TYPE, "application/pdf");
+                        values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/" + PDF_FOLDER_NAME);
+                        values.put(MediaStore.Downloads.IS_PENDING, 1);
 
-                        Uri uri = getContentResolver().insert(MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values);
+                        Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
 
                         if(uri == null) {
                             throw new IllegalStateException("Could not create PDF file");
@@ -156,13 +158,13 @@ public class MainActivity extends Activity {
                         }
 
                         ContentValues finishedValues = new ContentValues();
-                        finishedValues.put(MediaStore.Files.FileColumns.IS_PENDING, 0);
+                        finishedValues.put(MediaStore.Downloads.IS_PENDING, 0);
                         getContentResolver().update(uri, finishedValues, null, null);
                     } else {
-                        File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), PDF_FOLDER_NAME);
+                        File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), PDF_FOLDER_NAME);
 
                         if(!directory.exists() && !directory.mkdirs()) {
-                            throw new IllegalStateException("Documents folder is unavailable");
+                            throw new IllegalStateException("Download folder is unavailable");
                         }
 
                         File file = new File(directory, safeFileName);
@@ -176,8 +178,9 @@ public class MainActivity extends Activity {
                         sendBroadcast(scanIntent);
                     }
 
-                    Toast.makeText(MainActivity.this, "PDF saved to Documents/" + PDF_FOLDER_NAME, Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "PDF saved to Download/" + PDF_FOLDER_NAME, Toast.LENGTH_LONG).show();
                 } catch(Exception error) {
+                    Log.e(TAG, "PDF save failed", error);
                     Toast.makeText(MainActivity.this, "PDF save failed", Toast.LENGTH_LONG).show();
                 }
             });
