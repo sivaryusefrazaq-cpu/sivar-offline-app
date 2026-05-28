@@ -288,6 +288,7 @@ function generateInvoiceHTML(invoice){
             display:flex;
             align-items:center;
             justify-content:space-between;
+            min-height:130px;
             border-bottom:3px solid #4f7fff;
             position:relative;
             z-index:2;
@@ -298,7 +299,7 @@ function generateInvoiceHTML(invoice){
             </div>
 
             <div style="position:absolute;left:50%;transform:translateX(-50%);">
-                <img src="./logo.jpg" style="height:75px;background:white;padding:6px;border-radius:12px;object-fit:contain;">
+                <img src="./logo.png" style="height:105px;object-fit:contain;">
             </div>
 
             <div style="text-align:right;">
@@ -515,6 +516,7 @@ function generateInvoiceHTMLV2(invoice){
             display:flex;
             align-items:center;
             justify-content:space-between;
+            min-height:130px;
             border-bottom:3px solid #4f7fff;
             position:relative;
             z-index:2;
@@ -526,7 +528,7 @@ function generateInvoiceHTMLV2(invoice){
             </div>
 
             <div style="position:absolute;left:50%;transform:translateX(-50%);">
-                <img src="./logo.jpg" style="height:75px;background:white;padding:6px;border-radius:12px;object-fit:contain;">
+                <img src="./logo.png" style="height:105px;object-fit:contain;">
             </div>
 
             <div style="text-align:right;">
@@ -822,21 +824,12 @@ async function downloadInvoicePDF(invoiceNumber){
         const pdf = new jsPDF("p","mm","a4");
 
         const pageWidth = 210;
-        const pageHeight = 297;
-        const margin = 6;
-        const usableWidth = pageWidth - margin * 2;
-        const usableHeight = pageHeight - margin * 2;
-
+        const usableWidth = pageWidth;
         let imgWidth = usableWidth;
         let imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        if(imgHeight > usableHeight){
-            imgHeight = usableHeight;
-            imgWidth = (canvas.width * imgHeight) / canvas.height;
-        }
-
-        const x = (pageWidth - imgWidth) / 2;
-        const y = margin;
+        const x = 0;
+        const y = 0;
 
         pdf.addImage(imgData,"JPEG",x,y,imgWidth,imgHeight);
 
