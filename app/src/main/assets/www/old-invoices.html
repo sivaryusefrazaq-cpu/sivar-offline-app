@@ -722,6 +722,15 @@ function readBlobAsDataURL(blob){
 
 function loadImageAsDataURL(src){
     return new Promise(function(resolve, reject){
+        if(window.AndroidAssets && window.AndroidAssets.getDataUrl){
+            const assetDataUrl = window.AndroidAssets.getDataUrl(src);
+
+            if(assetDataUrl){
+                resolve(assetDataUrl);
+                return;
+            }
+        }
+
         const xhr = new XMLHttpRequest();
         xhr.open("GET", src, true);
         xhr.responseType = "blob";

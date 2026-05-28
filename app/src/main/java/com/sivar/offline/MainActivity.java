@@ -21,8 +21,10 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 public class MainActivity extends Activity {
@@ -49,6 +51,7 @@ public class MainActivity extends Activity {
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
 
         webView.addJavascriptInterface(new PdfBridge(), "AndroidPdf");
+        webView.addJavascriptInterface(new AssetBridge(), "AndroidAssets");
         requestStoragePermissionIfNeeded();
 
         webView.setWebViewClient(new WebViewClient() {
@@ -88,6 +91,40 @@ public class MainActivity extends Activity {
         });
 
         webView.loadUrl("file:///android_asset/www/index.html");
+    }
+
+    public class AssetBridge {
+        @JavascriptInterface
+        public String getDataUrl(String fileName) {
+            try {
+                String safeFileName = fileName == null ? "" : fileName.replace("\\", "/");
+                int slashIndex = safeFileName.lastIndexOf("/");
+
+                if(slashIndex >= 0) {
+                    safeFileName = safeFileName.substring(slashIndex + 1);
+                }
+
+                if(!"barcode.jpg".equals(safeFileName) && !"logo.jpg".equals(safeFileName)) {
+                    return "";
+                }
+
+                try(InputStream inputStream = getAssets().open("www/" + safeFileName);
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+
+                    while((bytesRead = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+
+                    String base64Data = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP);
+                    return "data:image/jpeg;base64," + base64Data;
+                }
+            } catch(Exception error) {
+                Log.e(TAG, "Could not read asset image", error);
+                return "";
+            }
+        }
     }
 
     private void requestStoragePermissionIfNeeded() {
